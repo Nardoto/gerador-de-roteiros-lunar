@@ -1382,7 +1382,24 @@
             a.click();
             URL.revokeObjectURL(url);
 
-            alert(`✅ Arquivo SRT gerado com ${currentBlocks.length} blocos!`);
+            // Também exportar documento de blocos (sem timestamps)
+            let blocosContent = '';
+            currentBlocks.forEach((block, index) => {
+                const text = block.trim();
+                if (!text) return;
+                blocosContent += `${index + 1}. ${text}\n\n`;
+            });
+
+            // Download do arquivo de blocos
+            const blocosBlob = new Blob([blocosContent.trim()], { type: 'text/plain;charset=utf-8' });
+            const blocosUrl = URL.createObjectURL(blocosBlob);
+            const blocosA = document.createElement('a');
+            blocosA.href = blocosUrl;
+            blocosA.download = 'blocos.txt';
+            blocosA.click();
+            URL.revokeObjectURL(blocosUrl);
+
+            alert(`✅ Arquivos gerados com ${currentBlocks.length} blocos!\n📄 roteiro.srt (com timestamps)\n📄 blocos.txt (sem timestamps)`);
         });
 
         // Formatar timestamp no formato SRT (HH:MM:SS,mmm)
