@@ -1,7 +1,7 @@
 {
-  "name": "gerador-roteiros-local",
+  "name": "gerador-roteiros-lunar",
   "version": "1.0.0",
-  "description": "Teste local do gerador de roteiros",
+  "description": "Gerador profissional de roteiros biblicos com IA",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

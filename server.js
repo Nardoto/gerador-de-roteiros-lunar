@@ -6,7 +6,7 @@ const path = require('path');
 const Anthropic = require('@anthropic-ai/sdk');
 const { login, verifyToken, authMiddleware } = require('./auth');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Inicializar cliente Anthropic
 const anthropic = new Anthropic({
