@@ -21,42 +21,42 @@ function loadUsers() {
       {
         id: 1,
         username: 'admin',
-        password: '$2b$10$6mF5Em8TKqNWnTeF3Na1WuAxOUxeTBCYPPnp8BkHYLdPOMfCje90m',
+        password: '$2b$10$3wvl9y5dnNrf9WImRotbUOfraNpCaQzVbS5Gy2WJZ6xevtmgQ6Uku',
         email: 'admin@email.com',
         createdAt: '2025-11-14'
       },
       {
         id: 2,
         username: 'Diego',
-        password: '$2b$10$/ju5eesqCeT2ICYYsRr7pO2rHw9u7bWAaXUKsXKltMg5Lmti6zywq',
+        password: '$2b$10$QDQfmORKU/OSesmcVaZxZuf5z81wMf1CZpspspDjAzkZYksPjXPqi',
         email: 'diego@email.com',
         createdAt: '2025-11-14'
       },
       {
         id: 3,
         username: 'Lucas',
-        password: '$2b$10$X9d1Lpr56JTLbvi1AYc.q.zC5LLChyqifBlgKt7.3di.ZQDaonCRG',
+        password: '$2b$10$3FuZytkiTFDhI2jEZdnEOeSINosCrZn2Kc1qO1ZmzLnvSSCY9tM1y',
         email: 'lucas@email.com',
         createdAt: '2025-11-14'
       },
       {
         id: 4,
         username: 'Nardoto',
-        password: '$2b$10$DD8yWSH23tlT5g8P5UumZeoEW1aitzON0s6IzMk.Royc9FbtsMXg2',
+        password: '$2b$10$a/TYsnavAz6aqVbT06Qw1.T0U8bB.Ps1MrSi3xqE0X2oKw4dyskUK',
         email: 'nardoto@email.com',
         createdAt: '2025-11-14'
       },
       {
         id: 5,
         username: 'Gabriel',
-        password: '$2b$10$SQOoENsdNn0m2l4K1/K7DuPABDP1ea3f5Dd/JSNjceyNq1UY2hmf.',
+        password: '$2b$10$w.u2VQKlkpi2v4NCNdgXnO7Qh3gCvoi9aNKaC.1mQsJP7CvfEZzoi',
         email: 'gabriel@email.com',
         createdAt: '2025-11-14'
       },
       {
         id: 6,
         username: 'Tayler',
-        password: '$2b$10$3WwFUVtk/r1ofnANsXm0hOGfwoC4Uo2VqNcmVDDKK08FY10g3N36S',
+        password: '$2b$10$hipxJCdkdctwaYXTvh6Aju1eh8zodxsj03i.3iQt5rPTbjQ2V7rZS',
         email: 'tayler@email.com',
         createdAt: '2025-11-14'
       }
