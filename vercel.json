@@ -1,5 +1,4 @@
 {
-  "version": 2,
   "rewrites": [
     { "source": "/", "destination": "/public/login.html" },
     { "source": "/login.html", "destination": "/public/login.html" },
@@ -9,8 +8,5 @@
     "api/**/*.js": {
       "maxDuration": 300
     }
-  },
-  "env": {
-    "ANTHROPIC_API_KEY": "@anthropic_api_key"
   }
 }
