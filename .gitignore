@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Sensitive files
+users.json
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
