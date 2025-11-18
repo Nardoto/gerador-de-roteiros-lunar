@@ -151,23 +151,14 @@ IMPORTANTE: ${input.numTopics} tópicos, ${input.numSubtopics} subtópicos cada.
     });
 
     // Extrair tópicos da estrutura (multilíngue)
-    const topicPattern = /(TÓPICO|TOPIC) \\d+:/gi;
+    // Usando non-capturing group (?:) para não incluir no split
+    const topicPattern = /(?:TÓPICO|TOPIC) \d+:/gi;
     const marcadores = estrutura.match(topicPattern);
     const parts = estrutura.split(topicPattern);
 
-    // Remover texto antes do primeiro tópico
-    const topicos = [];
-    for (let i = 1; i < parts.length; i += 2) {
-      if (parts[i + 1]) {
-        topicos.push(parts[i + 1].trim());
-      }
-    }
-
-    // Fallback se não encontrar
-    if (topicos.length === 0) {
-      parts.shift();
-      topicos.push(...parts.filter(t => t.trim().length > 0));
-    }
+    // Remover texto antes do primeiro tópico e filtrar vazios
+    parts.shift();
+    const topicos = parts.filter(t => t.trim().length > 0);
 
     console.log(`🔍 Encontrados ${marcadores ? marcadores.length : 0} marcadores`);
     console.log(`🔍 Extraídos ${topicos.length} tópicos`);
