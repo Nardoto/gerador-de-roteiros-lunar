@@ -4,7 +4,6 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
 
-// Função auxiliar para calcular max_tokens
 function calcMaxTokens(expectedChars) {
   return Math.ceil((expectedChars * 1.5) / 3.5);
 }
@@ -27,63 +26,61 @@ module.exports = async (req, res) => {
     const modeloUsar = modelo || 'claude-sonnet-4-20250514';
     const offsetNumero = offset || 0;
 
-    const languageInstructions = {
-      pt: 'Português (Brasil)',
+    const languageMap = {
+      pt: 'Brazilian Portuguese',
       en: 'English',
-      es: 'Español'
+      es: 'Spanish'
     };
-    const languagePrompt = languageInstructions[language || 'pt'];
+    const outputLanguage = languageMap[language || 'pt'];
 
-    // Formatar blocos para o prompt (usando offset para numeração correta)
-    const blocosNumerados = blocos.map((bloco, i) => `BLOCO ${offsetNumero + i + 1}:\n${bloco}`).join('\n\n');
+    // Format blocks for prompt (using offset for correct numbering)
+    const blocosNumerados = blocos.map((bloco, i) => `BLOCK ${offsetNumero + i + 1}:\n${bloco}`).join('\n\n');
 
-    // PROMPT OTIMIZADO - Com contexto histórico específico
-    const prompt = `Idioma: ${languagePrompt}
+    // ALL PROMPTS IN ENGLISH - With specific historical context
+    const prompt = `Analyze the historical period of blocks and create ${blocos.length} takes for video AI in JSON.
 
-Analise o período histórico dos blocos e crie ${blocos.length} takes para IA de vídeo em JSON.
-
-FORMATO (80-120 palavras cada):
+FORMAT (80-120 words each):
 {
   "take": 1,
-  "scene": "[Ação + ambiente + luz + câmera + vestuário de época + arquitetura típica do período]. Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate for [período histórico específico ex: ancient Egypt 1400 BC], real people, ultra-detailed, hyper realistic 8k.",
-  "character_anchors": ["Nome1", "Nome2"]
+  "scene": "[Action + environment + lighting + camera + period clothing + typical architecture]. Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate for [specific historical period ex: ancient Egypt 1400 BC], real people, ultra-detailed, hyper realistic 8k.",
+  "character_anchors": ["Name1", "Name2"]
 }
 
-EXEMPLO:
+EXAMPLE:
 {
   "take": 1,
   "scene": "Moses wearing simple linen robes typical of Hebrew slaves raises wooden staff toward churning waters of Red Sea, Egyptian chariots pursuing in background, desert landscape with palm trees, mud brick structures visible, golden hour lighting. Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate for ancient Egypt 1400 BC, real people, ultra-detailed, hyper realistic 8k.",
   "character_anchors": ["Moses"]
 }
 
-REGRAS CRÍTICAS:
-- Identificar época histórica dos blocos (ex: Êxodo = Egito 1400 AC, Jesus = Judeia século I)
-- Scene: 80-120 palavras incluindo período histórico específico
-- Descrever vestuário, arquitetura e ambiente da época correta
-- Terminar com "historically accurate for [período específico]"
-- character_anchors: nomes EXATOS ou []
-- Retornar APENAS array JSON
+CRITICAL RULES:
+- Identify historical era of blocks (ex: Exodus = Egypt 1400 BC, Jesus = Judea 1st century)
+- Scene: 80-120 words including specific historical period
+- Describe period clothing, architecture and environment of correct era
+- End with "historically accurate for [specific period]"
+- character_anchors: EXACT names or []
+- Return ONLY JSON array
 
-BLOCOS:
+BLOCKS:
 ${blocosNumerados}
 
-Retorne array JSON com ${blocos.length} takes com historicidade precisa.`;
+Return JSON array with ${blocos.length} takes with precise historicity.`;
 
     const response = await anthropic.messages.create({
       model: modeloUsar,
-      max_tokens: calcMaxTokens(blocos.length * 180), // Dinâmico baseado em número de blocos
+      max_tokens: calcMaxTokens(blocos.length * 180),
       messages: [{ role: 'user', content: prompt }]
     });
 
     let takesJson = response.content[0].text;
 
-    // Extrair JSON do response (caso tenha texto adicional)
+    // Extract JSON from response (in case there's additional text)
     const jsonMatch = takesJson.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       takesJson = jsonMatch[0];
     }
 
-    // Limpar possíveis problemas no JSON
+    // Clean possible JSON problems
     takesJson = takesJson
       .replace(/,\s*}/g, '}')
       .replace(/,\s*\]/g, ']')
@@ -97,11 +94,11 @@ Retorne array JSON com ${blocos.length} takes com historicidade precisa.`;
     try {
       takes = JSON.parse(takesJson);
     } catch (parseError) {
-      console.error('❌ Erro ao parsear JSON dos takes:', parseError.message);
-      throw new Error(`JSON inválido retornado pela IA. Tente com menos blocos.`);
+      console.error('❌ Error parsing takes JSON:', parseError.message);
+      throw new Error(`Invalid JSON returned by AI. Try with fewer blocks.`);
     }
 
-    // Função para normalizar e encontrar personagem
+    // Function to normalize and find character
     function findCharacter(nomeBuscado, personagensObj) {
       if (personagensObj[nomeBuscado]) {
         return personagensObj[nomeBuscado];
@@ -143,7 +140,7 @@ Retorne array JSON com ${blocos.length} takes com historicidade precisa.`;
       return null;
     }
 
-    // Montar arquivo final
+    // Build final file
     let takesCompleto = '';
     takes.forEach((take, idx) => {
       takesCompleto += `TAKE ${offsetNumero + idx + 1}\n`;
@@ -153,7 +150,7 @@ Retorne array JSON com ${blocos.length} takes com historicidade precisa.`;
         takesCompleto += `Character anchor${take.character_anchors.length > 1 ? 's' : ''}:\n`;
 
         take.character_anchors.forEach(nome => {
-          const descricao = findCharacter(nome, personagens) || '[Personagem não encontrado]';
+          const descricao = findCharacter(nome, personagens) || '[Character not found]';
           takesCompleto += `${nome}: ${descricao}\n`;
         });
       }
@@ -164,11 +161,11 @@ Retorne array JSON com ${blocos.length} takes com historicidade precisa.`;
     res.status(200).json({
       takesCompleto,
       numTakes: takes.length,
-      custoEstimado: '0.008' // Atualizado para economia de ~70%
+      custoEstimado: '0.008'
     });
 
   } catch (error) {
-    console.error('Erro ao gerar takes:', error);
+    console.error('Error generating takes:', error);
     res.status(500).json({ error: error.message });
   }
 };

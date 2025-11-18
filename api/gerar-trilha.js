@@ -4,7 +4,6 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
 
-// Função auxiliar para calcular max_tokens
 function calcMaxTokens(expectedChars) {
   return Math.ceil((expectedChars * 1.5) / 3.5);
 }
@@ -26,47 +25,47 @@ module.exports = async (req, res) => {
     const { roteiro, modelo, language } = req.body;
     const modeloUsar = modelo || 'claude-sonnet-4-20250514';
 
-    const languageInstructions = {
-      pt: 'Português (Brasil)',
+    const languageMap = {
+      pt: 'Brazilian Portuguese',
       en: 'English',
-      es: 'Español'
+      es: 'Spanish'
     };
-    const languagePrompt = languageInstructions[language || 'pt'];
+    const outputLanguage = languageMap[language || 'pt'];
 
-    // PROMPT OTIMIZADO - Reduzido de ~350 tokens para ~120 tokens
-    const prompt = `Idioma: ${languagePrompt}
+    // ALL PROMPTS IN ENGLISH - Reduced from ~350 tokens to ~120 tokens
+    const prompt = `Create soundtrack file for the script below.
 
-Crie arquivo de trilha sonora para o roteiro abaixo.
+FORMAT for each section (Hook, Topics, Conclusion):
 
-FORMATO para cada seção (Hook, Tópicos, Conclusão):
-
-SEÇÃO [nome]
-Sentimento [emoção e atmosfera]
+SECTION [name]
+Feeling [emotion and atmosphere]
 Keywords [keyword1] [keyword2] [keyword3] [keyword4]
-Mood [3-5 adjetivos em INGLÊS]
-Intensidade [Baixa ou Média ou Alta ou Crescente]
-Notas [quando mudar/crescer]
+Mood [3-5 adjectives in ENGLISH]
+Intensity [Low or Medium or High or Growing]
+Notes [when to change/grow]
 
-REGRAS:
-- Keywords em INGLÊS específicas (ex: documentary suspense)
-- Mood: 3-5 adjetivos em INGLÊS
-- Sem caracteres especiais (asteriscos, aspas, etc)
-- Alinhar com objetivo de cada seção
+RULES:
+- Keywords in ENGLISH specific (ex: documentary suspense)
+- Mood: 3-5 adjectives in ENGLISH
+- No special characters (asterisks, quotes, etc)
+- Align with each section objective
 
-Bibliotecas: Epidemic Sound, Artlist, AudioJungle, YouTube Audio Library
+Libraries: Epidemic Sound, Artlist, AudioJungle, YouTube Audio Library
 
-ROTEIRO:
+SCRIPT:
 ${roteiro}
 
-Inicie com:
-TRILHA SONORA E ORIENTAÇÕES MUSICAIS
+Start with:
+SOUNDTRACK AND MUSICAL GUIDANCE
 
-INSTRUÇÕES PARA BUSCA DE MÚSICAS
-Use keywords para buscar. Priorize músicas que correspondam ao mood.`;
+MUSIC SEARCH INSTRUCTIONS
+Use keywords to search. Prioritize songs matching the mood.
+
+Output section names in: ${outputLanguage}`;
 
     const response = await anthropic.messages.create({
       model: modeloUsar,
-      max_tokens: calcMaxTokens(1500), // ~650 tokens ao invés de 2000
+      max_tokens: calcMaxTokens(1500),
       messages: [{ role: 'user', content: prompt }]
     });
 
@@ -74,12 +73,12 @@ Use keywords para buscar. Priorize músicas que correspondam ao mood.`;
 
     res.status(200).json({
       trilha,
-      custoEstimado: '0.012', // Atualizado para economia de ~70%
-      numSecoes: trilha.split('SEÇÃO').length - 1
+      custoEstimado: '0.012',
+      numSecoes: trilha.split('SECTION').length - 1
     });
 
   } catch (error) {
-    console.error('Erro ao gerar trilha:', error);
+    console.error('Error generating soundtrack:', error);
     res.status(500).json({ error: error.message });
   }
 };

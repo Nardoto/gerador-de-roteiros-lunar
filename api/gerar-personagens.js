@@ -4,7 +4,6 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
 
-// Função auxiliar para calcular max_tokens
 function calcMaxTokens(expectedChars) {
   return Math.ceil((expectedChars * 1.5) / 3.5);
 }
@@ -26,51 +25,51 @@ module.exports = async (req, res) => {
     const { roteiro, modelo, language } = req.body;
     const modeloUsar = modelo || 'claude-sonnet-4-20250514';
 
-    const languageInstructions = {
-      pt: 'Português (Brasil)',
+    const languageMap = {
+      pt: 'Brazilian Portuguese',
       en: 'English',
-      es: 'Español'
+      es: 'Spanish'
     };
-    const languagePrompt = languageInstructions[language || 'pt'];
+    const outputLanguage = languageMap[language || 'pt'];
 
-    // PROMPT OTIMIZADO - Reduzido de ~1000 tokens para ~200 tokens
-    const prompt = `Idioma: ${languagePrompt}
+    // ALL PROMPTS IN ENGLISH - Reduced from ~1000 tokens to ~200 tokens
+    const prompt = `Analyze the script and list characters by order of importance.
 
-Analise o roteiro e liste personagens por ordem de importância.
+FORMAT:
+1. NAME (no suffixes)
 
-FORMATO:
-1. NOME (sem sufixos)
+[Physical description in ENGLISH: age, height, body, skin, face, eyes, hair, beard, clothes, environment. Continuous paragraph 80-150 words for main, 30-50 for secondary]
 
-[Descrição física em INGLÊS: idade, altura, corpo, pele, rosto, olhos, cabelo, barba, roupas, ambiente. Parágrafo contínuo 80-150 palavras para principais, 30-50 para secundários]
+RULES:
+- TOP 3 main: complete description (80-150 words)
+- Secondary: short description (30-50 words)
+- ONLY visible physical characteristics
+- Live-action documentary realistic style
+- End MAIN with: live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate, REAL PEOPLE, ultra-detailed, hyper realistic 8k
+- End SECONDARY with: live-action documentary style, real people, historically accurate
+- Keep original names (DAVI not DAVID)
+- No special characters
 
-REGRAS:
-- TOP 3 principais: descrição completa (80-150 palavras)
-- Secundários: descrição curta (30-50 palavras)
-- Apenas características físicas visíveis
-- Estilo live-action documental realista
-- Terminar PRINCIPAIS com: live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate, REAL PEOPLE, ultra-detailed, hyper realistic 8k
-- Terminar SECUNDÁRIOS com: live-action documentary style, real people, historically accurate
-- Manter nomes originais (DAVI não DAVID)
-- Sem caracteres especiais
-
-ROTEIRO:
+SCRIPT:
 ${roteiro}
 
-Inicie com:
+Start with:
 CHARACTER DESCRIPTIONS FOR AI IMAGE GENERATION
 
 INSTRUCTIONS
-Continuous paragraph format for Midjourney DALL-E Stable Diffusion Runway Kling AI etc.`;
+Continuous paragraph format for Midjourney DALL-E Stable Diffusion Runway Kling AI etc.
+
+Output names/titles in: ${outputLanguage}`;
 
     const response = await anthropic.messages.create({
       model: modeloUsar,
-      max_tokens: calcMaxTokens(2000), // ~850 tokens ao invés de 3000
+      max_tokens: calcMaxTokens(2000),
       messages: [{ role: 'user', content: prompt }]
     });
 
     const personagensTexto = response.content[0].text;
 
-    // Extrair personagens em objeto {nome: descrição}
+    // Extract characters as object {name: description}
     const personagensObj = {};
     const matches = personagensTexto.matchAll(/(\d+)\.\s*([A-Z\s]+)\n\n([^\n]+(?:\n(?!\d+\.)[^\n]+)*)/g);
 
@@ -84,11 +83,11 @@ Continuous paragraph format for Midjourney DALL-E Stable Diffusion Runway Kling 
       personagensTexto,
       personagensObj,
       numPersonagens: Object.keys(personagensObj).length,
-      custoEstimado: '0.015' // Atualizado para refletir economia de ~70%
+      custoEstimado: '0.015'
     });
 
   } catch (error) {
-    console.error('Erro ao gerar personagens:', error);
+    console.error('Error generating characters:', error);
     res.status(500).json({ error: error.message });
   }
 };

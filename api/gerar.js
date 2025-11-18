@@ -29,14 +29,14 @@ module.exports = async (req, res) => {
   try {
     const input = req.body;
 
-    // Definir instruções de idioma (simplificado)
-    const languageInstructions = {
-      pt: 'Português (Brasil)',
+    // Language mapping for output
+    const languageMap = {
+      pt: 'Brazilian Portuguese',
       en: 'English',
-      es: 'Español'
+      es: 'Spanish'
     };
     const selectedLanguage = input.language || 'pt';
-    const languagePrompt = languageInstructions[selectedLanguage];
+    const outputLanguage = languageMap[selectedLanguage];
 
     // Headers para Server-Sent Events
     res.writeHead(200, {
@@ -50,48 +50,48 @@ module.exports = async (req, res) => {
       res.write(`data: ${JSON.stringify(data)}\\n\\n`);
     };
 
-    console.log('\\n🚀 Iniciando geração OTIMIZADA (Opção B - Contexto Mínimo)...');
-    console.log('Título:', input.title);
-    console.log('Idioma:', selectedLanguage.toUpperCase());
-    console.log('Tópicos:', input.numTopics);
-    console.log('Modelo:', input.model || 'claude-sonnet-4-20250514');
+    console.log('\\n🚀 Starting OPTIMIZED generation (Option B - Minimal Context)...');
+    console.log('Title:', input.title);
+    console.log('Language:', selectedLanguage.toUpperCase());
+    console.log('Topics:', input.numTopics);
+    console.log('Model:', input.model || 'claude-sonnet-4-20250514');
 
     const claudeModel = input.model || 'claude-sonnet-4-20250514';
 
-    // Definir tipo de conteúdo e suas características
+    // Content type configurations
     const tipoConteudo = input.tipoConteudo || 'historias';
     const tiposConfig = {
       historias: {
-        estilo: 'narrativa cronológica imersiva, terceira pessoa, estilo literário'
+        estilo: 'immersive chronological narrative, third person, literary style'
       },
       curiosidades: {
-        estilo: 'fatos surpreendentes e reveladores, tom envolvente'
+        estilo: 'surprising and revealing facts, engaging tone'
       },
       estudos: {
-        estilo: 'análise teológica profunda com contexto histórico'
+        estilo: 'deep theological analysis with historical context'
       },
       personagens: {
-        estilo: 'perfil biográfico detalhado, exploração de caráter'
+        estilo: 'detailed biographical profile, character exploration'
       }
     };
 
     const config = tiposConfig[tipoConteudo] || tiposConfig.historias;
-    console.log('Tipo de Conteúdo:', tipoConteudo);
+    console.log('Content Type:', tipoConteudo);
 
-    // Verificar se há prompts customizados (Modo Avançado)
+    // Check for custom prompts (Advanced Mode)
     const customPrompts = input.customPrompts || {};
     const usandoCustom = Object.keys(customPrompts).length > 0;
     if (usandoCustom) {
-      console.log('🔧 MODO AVANÇADO: Usando prompts customizados');
+      console.log('🔧 ADVANCED MODE: Using custom prompts');
     }
 
     // ============================================================
-    // STEP 1: Estrutura
+    // STEP 1: Structure
     // ============================================================
-    console.log('\\n📋 Gerando estrutura...');
+    console.log('\\n📋 Generating structure...');
     sendEvent({ type: 'step', step: 'estrutura', status: 'started' });
 
-    // Definir formato de tópico por idioma
+    // Topic format by language
     const formatoTopico = {
       pt: 'TÓPICO',
       en: 'TOPIC',
@@ -99,25 +99,25 @@ module.exports = async (req, res) => {
     };
     const palavraTopico = formatoTopico[selectedLanguage];
 
-    // PROMPT OTIMIZADO - Reduzido de ~300 tokens para ~80 tokens
-    let estruturaPrompt = customPrompts.estrutura || `Crie ${input.numTopics} tópicos sobre "${input.title}".
+    // OPTIMIZED PROMPT - Reduced from ~300 tokens to ~80 tokens (ALL IN ENGLISH)
+    let estruturaPrompt = customPrompts.estrutura || `Create ${input.numTopics} topics about "${input.title}".
 
-Sinopse: ${input.synopsis}
-${input.knowledgeBase ? `\\nContexto: ${input.knowledgeBase}` : ''}
+Synopsis: ${input.synopsis}
+${input.knowledgeBase ? `\\nContext: ${input.knowledgeBase}` : ''}
 
-Formato OBRIGATÓRIO:
-${palavraTopico} 1: [título]
-1.1 [subtópico]
-1.2 [subtópico]
+MANDATORY FORMAT:
+${palavraTopico} 1: [title]
+1.1 [subtopic]
+1.2 [subtopic]
 ...1.${input.numSubtopics}
 
-${palavraTopico} 2: [título]
-2.1-2.${input.numSubtopics} [subtópicos]
+${palavraTopico} 2: [title]
+2.1-2.${input.numSubtopics} [subtopics]
 
-Idioma: ${languagePrompt}
-IMPORTANTE: ${input.numTopics} tópicos, ${input.numSubtopics} subtópicos cada. APENAS títulos (não desenvolva).`;
+Output language: ${outputLanguage}
+IMPORTANT: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY titles (do not develop).`;
 
-    // Substituir variáveis no prompt customizado
+    // Replace variables in custom prompt
     if (customPrompts.estrutura) {
       estruturaPrompt = estruturaPrompt
         .replace(/\{titulo\}/g, input.title)
@@ -125,18 +125,18 @@ IMPORTANTE: ${input.numTopics} tópicos, ${input.numSubtopics} subtópicos cada.
         .replace(/\{knowledgeBase\}/g, input.knowledgeBase || '')
         .replace(/\{numTopics\}/g, input.numTopics)
         .replace(/\{numSubtopics\}/g, input.numSubtopics)
-        .replace(/\{languagePrompt\}/g, languagePrompt);
+        .replace(/\{languagePrompt\}/g, outputLanguage);
     }
 
     const estruturaMsg = await anthropic.messages.create({
       model: claudeModel,
-      max_tokens: calcMaxTokens(800), // ~350 tokens ao invés de 4000
+      max_tokens: calcMaxTokens(800),
       messages: [{ role: 'user', content: estruturaPrompt }]
     });
 
     const estrutura = estruturaMsg.content[0].text;
 
-    console.log('✅ Estrutura gerada:', estrutura.length, 'chars');
+    console.log('✅ Structure generated:', estrutura.length, 'chars');
     console.log(estrutura.substring(0, 200) + '...');
 
     sendEvent({
@@ -150,21 +150,20 @@ IMPORTANTE: ${input.numTopics} tópicos, ${input.numSubtopics} subtópicos cada.
       wordCount: estrutura.split(/\\s+/).filter(w => w.length > 0).length
     });
 
-    // Extrair tópicos da estrutura (multilíngue)
-    // Usando non-capturing group (?:) para não incluir no split
+    // Extract topics from structure (multilingual)
     const topicPattern = /(?:TÓPICO|TOPIC) \d+:/gi;
     const marcadores = estrutura.match(topicPattern);
     const parts = estrutura.split(topicPattern);
 
-    // Remover texto antes do primeiro tópico e filtrar vazios
+    // Remove text before first topic and filter empty
     parts.shift();
     const topicos = parts.filter(t => t.trim().length > 0);
 
-    console.log(`🔍 Encontrados ${marcadores ? marcadores.length : 0} marcadores`);
-    console.log(`🔍 Extraídos ${topicos.length} tópicos`);
+    console.log(`🔍 Found ${marcadores ? marcadores.length : 0} markers`);
+    console.log(`🔍 Extracted ${topicos.length} topics`);
 
     if (topicos.length < input.numTopics) {
-      sendEvent({ type: 'error', error: `Apenas ${topicos.length} tópicos gerados. Esperava ${input.numTopics}.` });
+      sendEvent({ type: 'error', error: `Only ${topicos.length} topics generated. Expected ${input.numTopics}.` });
       res.end();
       return;
     }
@@ -172,32 +171,31 @@ IMPORTANTE: ${input.numTopics} tópicos, ${input.numSubtopics} subtópicos cada.
     // ============================================================
     // STEP 2: Hook
     // ============================================================
-    console.log('\\n🎣 Gerando hook...');
+    console.log('\\n🎣 Generating hook...');
     sendEvent({ type: 'step', step: 'hook', status: 'started' });
 
-    // PROMPT OTIMIZADO - Reduzido de ~150 tokens para ~40 tokens
-    // CONTEXTO MÍNIMO: Apenas título + estrutura resumida (não histórico completo)
-    let hookPrompt = customPrompts.hook || `Título: "${input.title}"
-Tópicos: ${topicos.map((t, i) => `${i + 1}. ${t.split('\\n')[0]}`).join('; ')}
+    // OPTIMIZED PROMPT (ALL IN ENGLISH)
+    let hookPrompt = customPrompts.hook || `Title: "${input.title}"
+Topics: ${topicos.map((t, i) => `${i + 1}. ${t.split('\\n')[0]}`).join('; ')}
 
-Crie introdução imersiva de EXATAMENTE ${input.hookChars} caracteres.
-Idioma: ${languagePrompt}`;
+Create immersive introduction of EXACTLY ${input.hookChars} characters.
+Output language: ${outputLanguage}`;
 
     if (customPrompts.hook) {
       hookPrompt = hookPrompt
         .replace(/\{hookChars\}/g, input.hookChars)
-        .replace(/\{languagePrompt\}/g, languagePrompt);
+        .replace(/\{languagePrompt\}/g, outputLanguage);
     }
 
     const hookMsg = await anthropic.messages.create({
       model: claudeModel,
       max_tokens: calcMaxTokens(input.hookChars),
-      messages: [{ role: 'user', content: hookPrompt }] // ← SEM HISTÓRICO!
+      messages: [{ role: 'user', content: hookPrompt }]
     });
 
     const hook = hookMsg.content[0].text;
 
-    console.log(`✅ Hook gerado: ${hook.length}/${input.hookChars} chars (${Math.round(hook.length/input.hookChars*100)}%)`);
+    console.log(`✅ Hook generated: ${hook.length}/${input.hookChars} chars (${Math.round(hook.length/input.hookChars*100)}%)`);
 
     sendEvent({
       type: 'message',
@@ -211,81 +209,76 @@ Idioma: ${languagePrompt}`;
     });
 
     // ============================================================
-    // STEP 3-N: Cada tópico COMPLETO (sem grupos!)
+    // STEP 3-N: Each COMPLETE topic (no groups!)
     // ============================================================
     const topicosGerados = [];
-    const resumosTopicos = []; // Para contexto mínimo entre tópicos
+    const resumosTopicos = [];
 
     for (let i = 0; i < input.numTopics; i++) {
       const topicoNum = i + 1;
       const topicoEstrutura = topicos[i];
 
-      console.log(`\\n📖 Gerando TÓPICO COMPLETO ${topicoNum}/${input.numTopics}...`);
+      console.log(`\\n📖 Generating COMPLETE TOPIC ${topicoNum}/${input.numTopics}...`);
 
       sendEvent({ type: 'step', step: `topico${topicoNum}`, status: 'started' });
 
-      // Calcular caracteres para este tópico
       const charsTotal = Math.floor(input.totalChars / input.numTopics);
 
-      console.log(`📊 Caracteres alvo: ${charsTotal}`);
+      console.log(`📊 Target characters: ${charsTotal}`);
 
-      // PROMPT ULTRA OTIMIZADO - Reduzido de ~400 tokens para ~120 tokens
-      // CONTEXTO MÍNIMO: Apenas estrutura do tópico + resumo dos anteriores
+      // ULTRA OPTIMIZED PROMPT (ALL IN ENGLISH)
       let topicoPrompt;
 
       if (customPrompts.topico) {
-        // Modo avançado - usar prompt customizado
         topicoPrompt = customPrompts.topico
           .replace(/\{topicoNum\}/g, topicoNum)
           .replace(/\{numTopicos\}/g, input.numTopics)
           .replace(/\{topicoEstrutura\}/g, topicoEstrutura)
           .replace(/\{charsTotal\}/g, charsTotal)
-          .replace(/\{languagePrompt\}/g, languagePrompt);
+          .replace(/\{languagePrompt\}/g, outputLanguage);
       } else {
-        // Prompt padrão otimizado
         const contextoAnterior = resumosTopicos.length > 0
-          ? `\\nJá abordado: ${resumosTopicos.join('; ')}`
+          ? `\\nAlready covered: ${resumosTopicos.join('; ')}`
           : '';
 
-        topicoPrompt = `Desenvolva este tópico:
+        topicoPrompt = `Develop this topic:
 
 ${topicoEstrutura}
 
 ${contextoAnterior}
 
-⚠️ OBRIGATÓRIO:
-- EXATAMENTE ${charsTotal} caracteres (margem ±3%)
-- Estilo: ${config.estilo}
-- Idioma: ${languagePrompt}
-- Fluido, sem títulos de subtópicos
-- Versículos integrados naturalmente
-- SEM repetir informações anteriores
+⚠️ MANDATORY:
+- EXACTLY ${charsTotal} characters (±3% margin)
+- Style: ${config.estilo}
+- Output language: ${outputLanguage}
+- Fluid, no subtopic titles
+- Bible verses integrated naturally
+- DO NOT repeat previous information
 
-CRÍTICO: Conte os caracteres! Alvo = ${charsTotal} chars.`;
+CRITICAL: Count characters! Target = ${charsTotal} chars.`;
       }
 
       const topicoMsg = await anthropic.messages.create({
         model: claudeModel,
         max_tokens: calcMaxTokens(charsTotal),
-        messages: [{ role: 'user', content: topicoPrompt }] // ← SEM HISTÓRICO!
+        messages: [{ role: 'user', content: topicoPrompt }]
       });
 
       const topicoTexto = topicoMsg.content[0].text;
 
-      // Adicionar título ao tópico
+      // Add title to topic
       const tituloTopico = topicoEstrutura.split('\\n')[0];
       const topicoCompleto = `**${tituloTopico}**\\n\\n${topicoTexto}`;
       topicosGerados.push(topicoCompleto);
 
-      // Guardar resumo para contexto dos próximos tópicos
-      const resumo = `Tópico ${topicoNum}: ${tituloTopico.substring(0, 50)} (${topicoTexto.length} chars)`;
+      // Save summary for next topics context
+      const resumo = `Topic ${topicoNum}: ${tituloTopico.substring(0, 50)} (${topicoTexto.length} chars)`;
       resumosTopicos.push(resumo);
 
       const accuracy = Math.round(topicoTexto.length / charsTotal * 100);
       const diff = topicoTexto.length - charsTotal;
-      console.log(`✅ Tópico ${topicoNum}: ${topicoTexto.length}/${charsTotal} chars (${accuracy}%, ${diff > 0 ? '+' : ''}${diff})`);
+      console.log(`✅ Topic ${topicoNum}: ${topicoTexto.length}/${charsTotal} chars (${accuracy}%, ${diff > 0 ? '+' : ''}${diff})`);
 
-      // Enviar tópico completo
       sendEvent({
         type: 'message',
         role: 'assistant',
@@ -307,35 +300,35 @@ CRÍTICO: Conte os caracteres! Alvo = ${charsTotal} chars.`;
     }
 
     // ============================================================
-    // STEP FINAL: Conclusão com CTA
+    // FINAL STEP: Conclusion with CTA
     // ============================================================
-    console.log('\\n🎬 Gerando conclusão/CTA...');
+    console.log('\\n🎬 Generating conclusion/CTA...');
     sendEvent({ type: 'step', step: 'conclusao', status: 'started' });
 
-    // PROMPT OTIMIZADO - Reduzido de ~200 tokens para ~60 tokens
-    let conclusaoPrompt = customPrompts.conclusao || `Título: "${input.title}"
+    // OPTIMIZED PROMPT (ALL IN ENGLISH)
+    let conclusaoPrompt = customPrompts.conclusao || `Title: "${input.title}"
 
-Crie conclusão (máximo 400 caracteres):
-- Inscrever no canal
-- Compartilhar vídeo
-- Comentar de onde assiste
-- Tom amigável
+Create conclusion (max 400 characters):
+- Subscribe to channel
+- Share video
+- Comment where watching from
+- Friendly tone
 
-Idioma: ${languagePrompt}`;
+Output language: ${outputLanguage}`;
 
     if (customPrompts.conclusao) {
-      conclusaoPrompt = conclusaoPrompt.replace(/\{languagePrompt\}/g, languagePrompt);
+      conclusaoPrompt = conclusaoPrompt.replace(/\{languagePrompt\}/g, outputLanguage);
     }
 
     const conclusaoMsg = await anthropic.messages.create({
       model: claudeModel,
       max_tokens: calcMaxTokens(400),
-      messages: [{ role: 'user', content: conclusaoPrompt }] // ← SEM HISTÓRICO!
+      messages: [{ role: 'user', content: conclusaoPrompt }]
     });
 
     const conclusao = conclusaoMsg.content[0].text;
 
-    console.log(`✅ Conclusão gerada: ${conclusao.length} chars`);
+    console.log(`✅ Conclusion generated: ${conclusao.length} chars`);
 
     sendEvent({
       type: 'message',
@@ -349,9 +342,9 @@ Idioma: ${languagePrompt}`;
     });
 
     // ============================================================
-    // Concluído
+    // Complete
     // ============================================================
-    console.log('\\n✅ Geração completa! (OTIMIZADO - 60-70% menos tokens)');
+    console.log('\\n✅ Generation complete! (OPTIMIZED - 60-70% fewer tokens)');
     sendEvent({
       type: 'complete',
       files: {
@@ -365,7 +358,7 @@ Idioma: ${languagePrompt}`;
     res.end();
 
   } catch (error) {
-    console.error('❌ Erro:', error);
+    console.error('❌ Error:', error);
     res.write(`data: ${JSON.stringify({ type: 'error', error: error.message })}\\n\\n`);
     res.end();
   }
