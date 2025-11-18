@@ -763,6 +763,7 @@
         let currentPersonagens = null; // Objeto com personagens gerados
         let startTime = null;
         let timerInterval = null;
+        let modoAutoAtivado = false; // Armazena se modo automático foi ativado ANTES de gerar
         const PAUSE_TIME = 0.9; // Pausa entre blocos em segundos
 
         // Função para atualizar barra de progresso
@@ -910,6 +911,10 @@
 
             currentFiles = {};
             currentBlocks = [];
+
+            // CAPTURAR modo automático AGORA (antes de gerar)
+            modoAutoAtivado = modoAutomaticoInicio.checked || (modoAutomatico && modoAutomatico.checked);
+            console.log('🎯 Modo automático capturado ao clicar em Gerar:', modoAutoAtivado);
 
             const selectedContentType = document.getElementById('contentType').value;
             const tipoConteudoMap = {
@@ -1065,17 +1070,10 @@
                                         // Atualizar progresso para 100%
                                         updateProgress(100, '✅ Geração completa!');
 
-                                        // Verificar se QUALQUER um dos checkboxes está marcado
-                                        console.log('🔍 DEBUG Modo Automático:');
-                                        console.log('   modoAutomaticoInicio existe?', !!modoAutomaticoInicio);
-                                        console.log('   modoAutomaticoInicio.checked?', modoAutomaticoInicio ? modoAutomaticoInicio.checked : 'N/A');
-                                        console.log('   modoAutomatico existe?', !!modoAutomatico);
-                                        console.log('   modoAutomatico.checked?', modoAutomatico ? modoAutomatico.checked : 'N/A');
+                                        // Verificar se modo automático foi ativado
+                                        console.log('🔍 Verificando modo automático:', modoAutoAtivado);
 
-                                        const modoAutoAtivo = modoAutomaticoInicio.checked || (modoAutomatico && modoAutomatico.checked);
-                                        console.log('   ✅ Modo automático ativo?', modoAutoAtivo);
-
-                                        if (modoAutoAtivo) {
+                                        if (modoAutoAtivado) {
                                             addMessage('Sistema', '✅ Roteiro completo! Iniciando geração automática de documentos...', 'system');
 
                                             // Gerar documentos automaticamente (sem await pois não estamos em função async)
