@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✅ v4.0 DEFINITIVO - Gerador de Roteiros</title>
+    <title>Gerador de Roteiros</title>
     <style>
         * {
             margin: 0;
@@ -12,25 +12,30 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
             min-height: 100vh;
             padding: 20px;
+            color: #000000;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         h1 {
             text-align: center;
-            color: #764ba2;
+            color: #000000;
             margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+            font-size: 2rem;
         }
 
         .grid {
@@ -41,9 +46,10 @@
         }
 
         .input-section, .output-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
+            background: #fafafa;
+            padding: 24px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -54,32 +60,45 @@
         }
 
         h2 {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            color: #333;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: #000000;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.75rem;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #555;
-            font-size: 0.9rem;
+            margin-bottom: 6px;
+            font-weight: 400;
+            color: #666666;
+            font-size: 0.85rem;
         }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 0.9rem;
             font-family: inherit;
+            background: #ffffff;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
-        input:focus, textarea:focus {
+        input:hover, textarea:hover, select:hover {
+            border-color: #999999;
+        }
+
+        input:focus, textarea:focus, select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #000000;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
         }
 
         textarea {
@@ -90,74 +109,112 @@
         .input-row {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
+            gap: 12px;
         }
 
         button {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 14px;
+            background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
         }
 
         button:hover:not(:disabled) {
+            background: linear-gradient(180deg, #1a1a1a 0%, #333333 100%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
             transform: translateY(-2px);
         }
 
+        button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
         button:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
 
         .messages {
             flex: 1;
             overflow-y: auto;
             background: white;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
             min-height: 400px;
         }
 
         .message {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            border-left: 3px solid #000000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .message:hover {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transform: translateX(2px);
         }
 
         .message.user {
-            background: #e3f2fd;
-            border-left-color: #2196F3;
+            background: #fafafa;
+            border-left-color: #666666;
         }
 
         .message.assistant {
-            background: #f3e5f5;
-            border-left-color: #9C27B0;
+            background: #f0f0f0;
+            border-left-color: #000000;
         }
 
         .message.system {
-            background: #fff3cd;
-            border-left-color: #ffc107;
+            background: #fafafa;
+            border-left-color: #999999;
         }
 
         .message.error {
-            background: #ffebee;
-            border-left-color: #f44336;
+            background: #f5f5f5;
+            border-left-color: #000000;
+            border-left-width: 3px;
         }
 
         .message-label {
-            font-weight: 600;
+            font-weight: 500;
             margin-bottom: 8px;
-            color: #333;
-            font-size: 0.85rem;
+            color: #000000;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .message-content {
@@ -172,43 +229,44 @@
         .message-stats {
             margin-top: 10px;
             padding: 8px 12px;
-            background: rgba(0,0,0,0.05);
-            border-radius: 6px;
+            background: #fafafa;
+            border-radius: 0;
             font-size: 0.85rem;
             color: #666;
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
+            border: 1px solid #e0e0e0;
         }
 
         .message-stats span {
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .prompt-toggle {
             margin-top: 8px;
-            padding: 6px 12px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.8rem;
+            padding: 6px 14px;
+            background: #f0f0f0;
+            color: #000000;
+            border: 1px solid #d0d0d0;
+            border-radius: 0;
+            font-size: 0.75rem;
             cursor: pointer;
             transition: background 0.2s;
         }
 
         .prompt-toggle:hover {
-            background: #5568d3;
+            background: #e0e0e0;
         }
 
         .prompt-content {
             display: none;
             margin-top: 10px;
-            padding: 12px;
-            background: #f0f0f0;
-            border-left: 3px solid #667eea;
-            border-radius: 6px;
-            font-size: 0.85rem;
+            padding: 16px;
+            background: #fafafa;
+            border-left: 2px solid #000000;
+            border-radius: 0;
+            font-size: 0.8rem;
             white-space: pre-wrap;
             color: #333;
             max-height: 300px;
@@ -221,13 +279,15 @@
 
         .progress {
             margin-top: 15px;
-            padding: 10px;
-            background: #e3f2fd;
-            border-radius: 8px;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 6px;
             text-align: center;
-            font-weight: 600;
-            color: #1976D2;
+            font-weight: 400;
+            color: #000000;
             display: none;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .downloads {
@@ -236,12 +296,12 @@
         }
 
         .download-btn {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             padding: 12px;
-            background: #4CAF50;
+            background: #000000;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 0;
             cursor: pointer;
             display: block;
             width: 100%;
@@ -250,23 +310,7 @@
         }
 
         .download-btn:hover {
-            background: #45a049;
-        }
-
-        /* Animação de pulso para o indicador de versão */
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 20px rgba(0,255,0,0.5);
-            }
-            50% {
-                transform: scale(1.02);
-                box-shadow: 0 0 30px rgba(0,255,0,0.8);
-            }
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 20px rgba(0,255,0,0.5);
-            }
+            background: #333333;
         }
     </style>
     <!-- JSZip para criar arquivos ZIP -->
@@ -274,41 +318,46 @@
 </head>
 <body>
     <div class="container">
-        <!-- INDICADOR DE VERSÃO - ANTI-CACHE -->
-        <div style="background: linear-gradient(135deg, #00ff00, #00cc00); color: #000; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 18px; box-shadow: 0 0 20px rgba(0,255,0,0.5); animation: pulse 2s infinite;">
-            ✅ VERSÃO 4.0 DEFINITIVO - Eventos SSE grudados resolvido!
-            <span style="display: block; font-size: 14px; margin-top: 5px;">
-                ⏰ Última atualização: <span id="updateTime"></span>
-                <br>Usando separador duplo \n\n correto!
-            </span>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0;">🎬 Gerador de Roteiros - Teste Local</h1>
-            <button id="logoutBtn" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                🚪 Sair
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
+            <div>
+                <h1 style="margin: 0; font-weight: 300; letter-spacing: -1px;">Script Generator</h1>
+                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto</div>
+                <div id="userName" style="font-size: 12px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;"></div>
+            </div>
+            <button id="logoutBtn" style="padding: 8px 20px; background: #000000; color: white; border: none; cursor: pointer; font-weight: 400; font-size: 14px;">
+                Exit
             </button>
         </div>
 
         <div class="grid">
             <!-- Inputs -->
             <div class="input-section">
-                <h2>📝 Configurações</h2>
+                <h2>Configuration</h2>
 
                 <label>Título do Vídeo:</label>
-                <input type="text" id="title" value="A Vida de Davi" placeholder="Ex: A Vida de Moisés">
+                <input type="text" id="title" placeholder="Ex: A Vida de Moisés">
 
-                <label>Sinopse:</label>
-                <textarea id="synopsis" placeholder="Descreva resumidamente o tema...">Como era Davi como Pai, será que ele como homem segundo coração de Deus foi um bom pai?</textarea>
+                <label>Tipo de Conteúdo:</label>
+                <select id="contentType">
+                    <option value="historia">História Bíblica de Personagem</option>
+                    <option value="curiosidade">Curiosidade Bíblica</option>
+                    <option value="estudo">Estudo Teológico</option>
+                </select>
 
-                <label>Base de Conhecimento (opcional):</label>
-                <textarea id="knowledge" placeholder="Informações adicionais..."></textarea>
+                <label>Tom e Contexto do Roteiro:</label>
+                <textarea id="synopsis" placeholder="Descreva o tom e contexto do vídeo..."></textarea>
 
-                <label>🌍 Idioma do Roteiro:</label>
-                <select id="language" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.95rem;">
-                    <option value="pt" selected>🇧🇷 Português</option>
-                    <option value="en">🇺🇸 English (Inglês)</option>
-                    <option value="es">🇪🇸 Español (Espanhol)</option>
+                <!-- Campo condicional para Estudo Teológico -->
+                <div id="extraContentField" style="display: none;">
+                    <label>Conteúdo Extra (para Estudo Teológico):</label>
+                    <textarea id="extraContent" placeholder="Informações adicionais para o estudo teológico..."></textarea>
+                </div>
+
+                <label>Idioma do Roteiro:</label>
+                <select id="language">
+                    <option value="pt">Português</option>
+                    <option value="en" selected>English</option>
+                    <option value="es">Español</option>
                 </select>
 
                 <div class="input-row">
@@ -330,80 +379,80 @@
                 <input type="number" id="totalChars" value="20000" step="1000">
 
                 <label>Modelo Claude (para roteiro):</label>
-                <select id="claudeModel" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.95rem;">
-                    <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (Recomendado - Melhor para Código)</option>
-                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (Rápido e Barato)</option>
-                    <option value="claude-opus-4-1-20250805">Claude Opus 4.1 (Melhor Qualidade)</option>
-                    <option value="claude-haiku-4-5">Claude Haiku 4.5 (Mais Rápido)</option>
+                <select id="claudeModel">
+                    <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (Recomendado)</option>
+                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (Rápido)</option>
+                    <option value="claude-opus-4-1-20250805">Claude Opus 4.1 (Qualidade)</option>
+                    <option value="claude-haiku-4-5" selected>Claude Haiku 4.5 (Mais Rápido)</option>
                 </select>
 
                 <!-- Configuração de Blocos -->
-                <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #FF9800;">
-                    <label style="font-weight: bold; color: #FF9800; margin-bottom: 8px; display: block;">📐 Configuração de Divisão em Blocos:</label>
+                <div style="background: #fafafa; padding: 12px; border-radius: 0; margin-bottom: 15px; border-left: 2px solid #000000;">
+                    <label style="font-weight: bold; color: #000000; margin-bottom: 8px; display: block;">Configuração de Divisão em Blocos:</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div>
                             <label style="font-size: 0.85rem;">Caracteres por Bloco:</label>
-                            <input type="number" id="blockCharsConfig" value="490" min="80" max="500" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 6px;">
+                            <input type="number" id="blockCharsConfig" value="80" min="80" max="500" style="width: 100%; padding: 8px; border: 1px solid #d0d0d0; border-radius: 0;">
                         </div>
                         <div>
                             <label style="font-size: 0.85rem;">Reading Rate (c/s):</label>
-                            <input type="number" id="readingRateConfig" value="12" min="5" max="30" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 6px;">
+                            <input type="number" id="readingRateConfig" value="12" min="5" max="30" style="width: 100%; padding: 8px; border: 1px solid #d0d0d0; border-radius: 0;">
                         </div>
                     </div>
                 </div>
 
                 <!-- Modo Automático -->
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                    <label style="color: white; display: flex; align-items: center; cursor: pointer; font-size: 16px; font-weight: bold;">
-                        <input type="checkbox" id="modoAutomaticoInicio" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
-                        🚀 MODO AUTOMÁTICO - Gera roteiro + documentos
+                <div style="background: #fafafa; padding: 15px; border-radius: 0; margin-bottom: 15px; border: 1px solid #d0d0d0;">
+                    <label style="color: #000000; display: flex; align-items: center; cursor: pointer; font-size: 14px; font-weight: 500;">
+                        <input type="checkbox" id="modoAutomaticoInicio" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                        MODO AUTOMÁTICO - Gera roteiro + documentos
                     </label>
-                    <div id="configAutomatico" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3);">
-                        <label style="color: white; display: block; margin-bottom: 5px; font-size: 13px;">⚙️ Modelo para Documentos (Trilha + Personagens):</label>
-                        <select id="modeloDocumentosInicio" style="padding: 8px; border-radius: 6px; border: none; font-size: 14px; width: 100%; margin-bottom: 10px;">
-                            <option value="claude-sonnet-4-20250514" selected>Sonnet 4 (mais barato)</option>
+                    <div id="configAutomatico" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #d0d0d0;">
+                        <label style="color: #000000; display: block; margin-bottom: 5px; font-size: 13px;">Modelo para Documentos (Trilha + Personagens):</label>
+                        <select id="modeloDocumentosInicio" style="padding: 8px; border-radius: 0; border: 1px solid #d0d0d0; font-size: 14px; width: 100%; margin-bottom: 10px;">
+                            <option value="claude-sonnet-4-20250514">Sonnet 4 (mais barato)</option>
                             <option value="claude-sonnet-4-5-20250929">Sonnet 4.5</option>
-                            <option value="claude-haiku-4-5">Haiku 4.5 (muito rápido)</option>
+                            <option value="claude-haiku-4-5" selected>Haiku 4.5 (muito rápido e barato)</option>
                         </select>
 
-                        <label style="color: white; display: block; margin-bottom: 5px; font-size: 13px;">🎬 Modelo para Takes (Prompts de Imagem):</label>
-                        <select id="modeloTakesInicio" style="padding: 8px; border-radius: 6px; border: none; font-size: 14px; width: 100%;">
-                            <option value="claude-sonnet-4-20250514" selected>Sonnet 4 (mais barato)</option>
+                        <label style="color: #000000; display: block; margin-bottom: 5px; font-size: 13px;">Modelo para Takes (Prompts de Imagem):</label>
+                        <select id="modeloTakesInicio" style="padding: 8px; border-radius: 0; border: 1px solid #d0d0d0; font-size: 14px; width: 100%;">
+                            <option value="claude-sonnet-4-20250514">Sonnet 4 (mais barato)</option>
                             <option value="claude-sonnet-4-5-20250929">Sonnet 4.5 (recomendado)</option>
-                            <option value="claude-haiku-4-5">Haiku 4.5 (muito rápido)</option>
+                            <option value="claude-haiku-4-5" selected>Haiku 4.5 (muito rápido e barato)</option>
                         </select>
 
-                        <div style="color: #fff3cd; font-size: 12px; margin-top: 8px;">
-                            ⏱️ Tempo estimado: ~3-5 minutos | Custo: ~$0.80-$1.00
+                        <div style="color: #666666; font-size: 12px; margin-top: 8px;">
+                            Tempo estimado: ~3-5 minutos | Custo: ~$0.80-$1.00
                         </div>
                     </div>
                 </div>
 
-                <button id="generateBtn" style="font-size: 16px; padding: 15px; font-weight: bold;">
-                    <span id="generateBtnText">🚀 Gerar Roteiro</span>
+                <button id="generateBtn" style="font-size: 14px; padding: 15px; font-weight: 500;">
+                    <span id="generateBtnText">GERAR ROTEIRO</span>
                 </button>
 
                 <div class="progress" id="progress">
                     <span id="progressText">Gerando...</span>
-                    <span id="timer" style="display: none; margin-left: 10px; font-weight: bold;">⏱️ 0:00</span>
+                    <span id="timer" style="display: none; margin-left: 10px; font-weight: 500;">0:00</span>
 
                     <!-- Barra de Progresso Visual -->
-                    <div style="width: 100%; background: #e0e0e0; border-radius: 10px; margin-top: 15px; height: 30px; overflow: hidden;">
-                        <div id="progressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
+                    <div style="width: 100%; background: #e0e0e0; border-radius: 0; margin-top: 15px; height: 30px; overflow: hidden;">
+                        <div id="progressBar" style="width: 0%; height: 100%; background: #000000; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500; font-size: 14px;">
                             <span id="progressPercent">0%</span>
                         </div>
                     </div>
 
                     <!-- Contadores de Caracteres -->
-                    <div id="charCounters" style="display: none; margin-top: 15px; padding: 12px; background: #e3f2fd; border-radius: 8px; font-size: 0.85rem;">
+                    <div id="charCounters" style="display: none; margin-top: 15px; padding: 12px; background: #fafafa; border-radius: 0; font-size: 0.85rem; border: 1px solid #e0e0e0;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <div>
-                                <strong>📝 Roteiro:</strong>
-                                <div id="roteiroChars" style="font-size: 1.1rem; font-weight: bold; color: #1976D2;">0 caracteres</div>
+                                <strong>Roteiro:</strong>
+                                <div id="roteiroChars" style="font-size: 1.1rem; font-weight: 500; color: #000000;">0 caracteres</div>
                             </div>
                             <div>
-                                <strong>📦 Total (com docs):</strong>
-                                <div id="totalCharsDisplay" style="font-size: 1.1rem; font-weight: bold; color: #388E3C;">0 caracteres</div>
+                                <strong>Total (com docs):</strong>
+                                <div id="totalCharsDisplay" style="font-size: 1.1rem; font-weight: 500; color: #000000;">0 caracteres</div>
                             </div>
                         </div>
                     </div>
@@ -412,7 +461,7 @@
 
             <!-- Outputs -->
             <div class="output-section">
-                <h2>💬 Conversa com IA</h2>
+                <h2>Output</h2>
                 <div class="messages" id="messages">
                     <div class="message system">
                         <div class="message-label">Sistema</div>
@@ -421,73 +470,73 @@
                 </div>
 
                 <div class="downloads" id="downloads">
-                    <h2>📥 Downloads</h2>
+                    <h2>Downloads</h2>
 
                     <!-- Botão Principal -->
-                    <button id="downloadTudo" class="download-btn" style="background: linear-gradient(135deg, #00e676 0%, #00c853 100%); color: #000; font-size: 16px; font-weight: bold; padding: 15px; margin-bottom: 10px;">
-                        📦 BAIXAR TODOS OS DOCUMENTOS
+                    <button id="downloadTudo" class="download-btn" style="background: #000000; color: white; font-size: 14px; font-weight: 500; padding: 15px; margin-bottom: 10px;">
+                        BAIXAR TODOS OS DOCUMENTOS
                     </button>
 
                     <!-- Botão JSON -->
-                    <button id="downloadJSON" class="download-btn" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white; font-size: 14px; font-weight: bold; padding: 12px; margin-bottom: 15px;">
-                        📋 BAIXAR JSON (Documentação Completa)
+                    <button id="downloadJSON" class="download-btn" style="background: #000000; color: white; font-size: 14px; font-weight: 500; padding: 12px; margin-bottom: 15px;">
+                        BAIXAR JSON (Documentação Completa)
                     </button>
 
                     <!-- Botões Individuais -->
-                    <button class="download-btn" id="downloadEstrutura">📋 Baixar Estrutura</button>
-                    <button class="download-btn" id="downloadHook">🎣 Baixar Hook</button>
-                    <button class="download-btn" id="downloadTopico1">📖 Baixar Tópico 1</button>
-                    <button class="download-btn" id="downloadTopico2">📖 Baixar Tópico 2</button>
-                    <button class="download-btn" id="downloadTopico3">📖 Baixar Tópico 3</button>
-                    <button class="download-btn" id="downloadCompleto">📝 Baixar Roteiro Completo</button>
+                    <button class="download-btn" id="downloadEstrutura">Baixar Estrutura</button>
+                    <button class="download-btn" id="downloadHook">Baixar Hook</button>
+                    <button class="download-btn" id="downloadTopico1">Baixar Tópico 1</button>
+                    <button class="download-btn" id="downloadTopico2">Baixar Tópico 2</button>
+                    <button class="download-btn" id="downloadTopico3">Baixar Tópico 3</button>
+                    <button class="download-btn" id="downloadCompleto">Baixar Roteiro Completo</button>
                 </div>
             </div>
         </div>
 
-        <!-- Seção de Import de Blocos (sempre visível) -->
-        <div class="container" style="margin-top: 30px;">
-            <div style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); padding: 20px; border-radius: 12px;">
-                <h2 style="color: white; margin-top: 0;">📤 Importar Blocos e Gerar Takes</h2>
-                <p style="color: rgba(255,255,255,0.9); margin-bottom: 15px; font-size: 14px;">
+        <!-- Seção de Import de Blocos (oculta) -->
+        <div class="container" style="margin-top: 30px; display: none;">
+            <div style="background: #fafafa; padding: 20px; border-radius: 6px; border: 1px solid #e0e0e0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);">
+                <h2 style="color: #000000; margin-top: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem;">Importar Blocos e Gerar Takes</h2>
+                <p style="color: #666666; margin-bottom: 15px; font-size: 14px;">
                     Faça upload do arquivo <strong>blocos.txt</strong> para gerar apenas os takes, sem precisar gerar o roteiro novamente.
                 </p>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: end;">
                     <div>
-                        <label style="color: white; display: block; margin-bottom: 8px; font-weight: bold;">📄 Arquivo blocos.txt:</label>
-                        <input type="file" id="blocosFileInput" accept=".txt" style="padding: 10px; border-radius: 6px; border: 2px solid white; background: white; width: 100%; font-size: 14px;">
+                        <label style="color: #000000; display: block; margin-bottom: 8px; font-weight: 500;">Arquivo blocos.txt:</label>
+                        <input type="file" id="blocosFileInput" accept=".txt" style="padding: 10px; border-radius: 6px; border: 1px solid #d0d0d0; background: white; width: 100%; font-size: 14px;">
                     </div>
 
                     <div>
-                        <label style="color: white; display: block; margin-bottom: 8px; font-weight: bold;">👥 Personagens (opcional):</label>
-                        <input type="file" id="personagensFileInput" accept=".txt" style="padding: 10px; border-radius: 6px; border: 2px solid white; background: white; width: 100%; font-size: 14px;">
-                        <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px;">Se não enviar, aparecerá "[Personagem não encontrado]"</div>
+                        <label style="color: #000000; display: block; margin-bottom: 8px; font-weight: 500;">Personagens (opcional):</label>
+                        <div style="font-size: 11px; color: #999999; margin-bottom: 6px;">Se não enviar, aparecerá "[Personagem não encontrado]"</div>
+                        <input type="file" id="personagensFileInput" accept=".txt" style="padding: 10px; border-radius: 6px; border: 1px solid #d0d0d0; background: white; width: 100%; font-size: 14px;">
                     </div>
 
                     <div>
-                        <label style="color: white; display: block; margin-bottom: 8px; font-weight: bold;">⚙️ Modelo:</label>
-                        <select id="modeloTakesImport" style="padding: 10px; border-radius: 6px; border: none; font-size: 14px; width: 200px;">
-                            <option value="claude-sonnet-4-20250514" selected>Sonnet 4 (mais barato)</option>
+                        <label style="color: #000000; display: block; margin-bottom: 8px; font-weight: 500;">Modelo:</label>
+                        <select id="modeloTakesImport" style="padding: 10px; border-radius: 6px; border: 1px solid #d0d0d0; font-size: 14px; width: 200px;">
+                            <option value="claude-sonnet-4-20250514">Sonnet 4 (mais barato)</option>
                             <option value="claude-sonnet-4-5-20250929">Sonnet 4.5 (recomendado)</option>
                             <option value="claude-opus-4-1-20250805">Opus 4.1 (melhor qualidade)</option>
-                            <option value="claude-haiku-4-5">Haiku 4.5 (mais rápido)</option>
+                            <option value="claude-haiku-4-5" selected>Haiku 4.5 (mais rápido e barato)</option>
                         </select>
                     </div>
                 </div>
 
-                <button id="importBlocosBtn" class="download-btn" disabled style="background: #00e676; color: #000; font-size: 16px; font-weight: bold; padding: 15px; margin-top: 15px; width: 100%;">
-                    🎬 GERAR TAKES A PARTIR DOS BLOCOS
+                <button id="importBlocosBtn" class="download-btn" disabled style="background: #000000; color: white; font-size: 14px; font-weight: 500; padding: 15px; margin-top: 15px; width: 100%;">
+                    GERAR TAKES A PARTIR DOS BLOCOS
                     <div style="font-size: 12px; font-weight: normal; margin-top: 5px;">Custo: ~$0.08 (depende do número de blocos)</div>
                 </button>
 
                 <!-- Status Import -->
-                <div id="importStatus" style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 8px; color: white; display: none;">
-                    <strong>⏳ Status:</strong>
+                <div id="importStatus" style="margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 6px; color: #000000; display: none; border: 1px solid #e0e0e0;">
+                    <strong>Status:</strong>
                     <div id="importStatusText" style="margin-top: 8px; margin-bottom: 12px;"></div>
 
                     <!-- Barra de Progresso -->
-                    <div style="width: 100%; background: rgba(255,255,255,0.3); border-radius: 10px; height: 30px; overflow: hidden;">
-                        <div id="importProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00e676 0%, #00c853 100%); transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
+                    <div style="width: 100%; background: #e0e0e0; border-radius: 6px; height: 30px; overflow: hidden;">
+                        <div id="importProgressBar" style="width: 0%; height: 100%; background: #000000; transition: width 0.3s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500; font-size: 14px;">
                             <span id="importProgressPercent">0%</span>
                         </div>
                     </div>
@@ -497,49 +546,49 @@
 
         <!-- Ferramentas de Manipulação -->
         <div id="tools" class="container" style="display: none; margin-top: 30px;">
-            <h1>🛠️ Ferramentas de Manipulação</h1>
+            <h1 style="font-weight: 300; letter-spacing: -0.5px;">Ferramentas de Manipulação</h1>
 
             <!-- Seção de IA -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                <h2 style="color: white; margin-top: 0;">🤖 Geração com IA</h2>
+            <div style="background: #fafafa; padding: 20px; border-radius: 0; margin-bottom: 20px; border: 1px solid #e0e0e0;">
+                <h2 style="color: #000000; margin-top: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem;">Geração com IA</h2>
 
                 <!-- Configurações -->
                 <div style="display: grid; grid-template-columns: 1fr auto; gap: 15px; margin-bottom: 15px; align-items: center;">
                     <div>
-                        <label style="color: white; display: block; margin-bottom: 5px; font-weight: bold;">⚙️ Modelo para Documentos:</label>
-                        <select id="modeloDocumentos" style="padding: 8px; border-radius: 6px; border: none; font-size: 14px; width: 100%;">
+                        <label style="color: #000000; display: block; margin-bottom: 5px; font-weight: 500;">Modelo para Documentos:</label>
+                        <select id="modeloDocumentos" style="padding: 8px; border-radius: 0; border: 1px solid #d0d0d0; font-size: 14px; width: 100%;">
                             <option value="claude-sonnet-4-20250514" selected>Sonnet 4 (mais barato)</option>
                             <option value="claude-sonnet-4-5-20250929">Sonnet 4.5 (recomendado)</option>
                         </select>
                     </div>
 
                     <div style="text-align: right;">
-                        <label style="color: white; display: block; margin-bottom: 5px; font-weight: bold; cursor: pointer;">
+                        <label style="color: #000000; display: block; margin-bottom: 5px; font-weight: 500; cursor: pointer;">
                             <input type="checkbox" id="modoAutomatico" style="margin-right: 5px; width: 18px; height: 18px; vertical-align: middle; cursor: pointer;">
-                            🚀 Modo Automático
+                            Modo Automático
                         </label>
-                        <span style="color: rgba(255,255,255,0.8); font-size: 11px; display: block;">Gera tudo em sequência</span>
+                        <span style="color: #666666; font-size: 11px; display: block;">Gera tudo em sequência</span>
                     </div>
                 </div>
 
                 <!-- Botão Automático (só aparece se modo automático estiver ativo) -->
                 <div id="btnAutomaticoContainer" style="display: none; margin-bottom: 15px;">
-                    <button id="gerarTodosBtn" class="download-btn" style="background: #00e676; color: #000; font-size: 16px; font-weight: bold; padding: 15px;">
-                        🚀 GERAR TODOS OS DOCUMENTOS (~45s)
+                    <button id="gerarTodosBtn" class="download-btn" style="background: #000000; color: white; font-size: 14px; font-weight: 500; padding: 15px;">
+                        GERAR TODOS OS DOCUMENTOS (~45s)
                         <div style="font-size: 12px; font-weight: normal; margin-top: 5px;">Trilha + Personagens + Takes | Custo: ~$0.12</div>
                     </button>
                 </div>
 
                 <!-- Botões Individuais -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-                    <button id="gerarTrilhaBtn" class="download-btn" style="background: #9c27b0;">🎵 Gerar Trilha Sonora</button>
-                    <button id="gerarPersonagensBtn" class="download-btn" style="background: #e91e63;">👥 Gerar Personagens</button>
-                    <button id="gerarTakesBtn" class="download-btn" style="background: #f44336;" disabled title="Gere os personagens primeiro">🎬 Gerar Takes</button>
+                    <button id="gerarTrilhaBtn" class="download-btn" style="background: #000000;">Gerar Trilha Sonora</button>
+                    <button id="gerarPersonagensBtn" class="download-btn" style="background: #000000;">Gerar Personagens</button>
+                    <button id="gerarTakesBtn" class="download-btn" style="background: #666666;" disabled title="Gere os personagens primeiro">Gerar Takes</button>
                 </div>
 
                 <!-- Status -->
-                <div id="aiStatus" style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 8px; color: white; display: none;">
-                    <strong>⏳ Status:</strong>
+                <div id="aiStatus" style="margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 0; color: #000000; display: none; border: 1px solid #e0e0e0;">
+                    <strong>Status:</strong>
                     <div id="aiStatusText"></div>
                 </div>
             </div>
@@ -547,12 +596,12 @@
             <div class="grid">
                 <!-- Config da divisão -->
                 <div class="input-section">
-                    <h2>⚙️ Configurações</h2>
+                    <h2>Configurações</h2>
 
                     <div class="input-row">
                         <div>
                             <label>Caracteres por Bloco:</label>
-                            <input type="number" id="blockChars" value="490" min="100" max="500">
+                            <input type="number" id="blockChars" value="80" min="100" max="500">
                         </div>
                         <div>
                             <label>Palavras por Bloco:</label>
@@ -564,20 +613,20 @@
                         </div>
                     </div>
 
-                    <button id="divideByCharsBtn" class="download-btn" style="background: #FF9800;">📐 Dividir por Caracteres</button>
-                    <button id="divideByWordsBtn" class="download-btn" style="background: #FF9800; margin-top: 10px;">📝 Dividir por Palavras</button>
-                    <button id="exportSrtBtn" class="download-btn" style="background: #2196F3; margin-top: 10px;">📄 Exportar SRT</button>
+                    <button id="divideByCharsBtn" class="download-btn" style="background: #000000;">Dividir por Caracteres</button>
+                    <button id="divideByWordsBtn" class="download-btn" style="background: #000000; margin-top: 10px;">Dividir por Palavras</button>
+                    <button id="exportSrtBtn" class="download-btn" style="background: #000000; margin-top: 10px;">Exportar SRT</button>
 
-                    <div id="blocksInfo" style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 8px; display: none;">
-                        <strong>📊 Informações:</strong>
+                    <div id="blocksInfo" style="margin-top: 15px; padding: 10px; background: #fafafa; border-radius: 0; display: none; border: 1px solid #e0e0e0;">
+                        <strong>Informações:</strong>
                         <div id="blocksStats"></div>
                     </div>
                 </div>
 
                 <!-- Preview dos blocos -->
                 <div class="output-section">
-                    <h2>📦 Blocos Gerados</h2>
-                    <div id="blocksPreview" style="max-height: 600px; overflow-y: auto; background: white; border: 2px solid #ddd; border-radius: 8px; padding: 15px;">
+                    <h2>Blocos Gerados</h2>
+                    <div id="blocksPreview" style="max-height: 600px; overflow-y: auto; background: white; border: 1px solid #d0d0d0; border-radius: 0; padding: 15px;">
                         <p style="color: #999;">Divida o roteiro para ver os blocos aqui.</p>
                     </div>
                 </div>
@@ -598,15 +647,7 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            const updateTime = document.getElementById('updateTime');
-            if (updateTime) {
-                updateTime.textContent = new Date().toLocaleString('pt-BR');
-            }
-
-            // Adicionar alerta visual no console
-            console.log('%c✅ VERSÃO 4.0 DEFINITIVO!', 'background: #00ff00; color: #000; font-size: 20px; padding: 10px;');
-            console.log('%cSSE Fix: Eventos grudados resolvido!', 'background: #00cc00; color: #fff; font-size: 16px; padding: 8px;');
-            console.log('Última atualização:', new Date().toLocaleString('pt-BR'));
+            console.log('Script Generator v4.2');
         });
 
         // Verificar autenticação
@@ -615,11 +656,29 @@
             window.location.href = 'login.html';
         }
 
+        // Mostrar nome do usuário
+        const user = localStorage.getItem('user');
+        if (user) {
+            document.getElementById('userName').textContent = `User: ${user}`;
+        }
+
         // Botão de logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
             window.location.href = 'login.html';
+        });
+
+        // Toggle campo extra para Estudo Teológico
+        const contentType = document.getElementById('contentType');
+        const extraContentField = document.getElementById('extraContentField');
+
+        contentType.addEventListener('change', () => {
+            if (contentType.value === 'estudo') {
+                extraContentField.style.display = 'block';
+            } else {
+                extraContentField.style.display = 'none';
+            }
         });
 
         // Função para fazer requisições autenticadas
@@ -746,12 +805,12 @@
         modoAutomaticoInicio.addEventListener('change', () => {
             if (modoAutomaticoInicio.checked) {
                 configAutomatico.style.display = 'block';
-                generateBtnText.textContent = '🚀 GERAR TUDO AUTOMATICAMENTE';
-                generateBtn.style.background = 'linear-gradient(135deg, #00e676 0%, #00c853 100%)';
-                generateBtn.style.color = '#000';
+                generateBtnText.textContent = 'GERAR TUDO AUTOMATICAMENTE';
+                generateBtn.style.background = '#000000';
+                generateBtn.style.color = 'white';
             } else {
                 configAutomatico.style.display = 'none';
-                generateBtnText.textContent = '🚀 Gerar Roteiro';
+                generateBtnText.textContent = 'GERAR ROTEIRO';
                 generateBtn.style.background = '';
                 generateBtn.style.color = '';
             }
@@ -799,6 +858,14 @@
             messages.scrollTop = messages.scrollHeight;
         }
 
+        // Função para sanitizar nome de arquivo
+        function sanitizeFilename(text) {
+            return text
+                .replace(/[<>:"/\\|?*]/g, '') // Remove caracteres inválidos
+                .replace(/\s+/g, '_') // Substitui espaços por underscore
+                .substring(0, 100); // Limita tamanho
+        }
+
         function downloadFile(filename, content) {
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
@@ -807,6 +874,12 @@
             a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
+        }
+
+        // Função para obter o título sanitizado
+        function getTituloArquivo() {
+            const titulo = document.getElementById('title').value.trim();
+            return titulo ? sanitizeFilename(titulo) : 'roteiro';
         }
 
         generateBtn.addEventListener('click', async () => {
@@ -825,10 +898,18 @@
             currentFiles = {};
             currentBlocks = [];
 
+            const selectedContentType = document.getElementById('contentType').value;
+            const tipoConteudoMap = {
+                'historia': 'historias',
+                'curiosidade': 'curiosidades',
+                'estudo': 'estudos'
+            };
+
             const input = {
                 title: document.getElementById('title').value,
                 synopsis: document.getElementById('synopsis').value,
-                knowledgeBase: document.getElementById('knowledge').value,
+                knowledgeBase: selectedContentType === 'estudo' ? document.getElementById('extraContent').value : '',
+                tipoConteudo: tipoConteudoMap[selectedContentType],
                 language: document.getElementById('language').value,
                 numTopics: parseInt(document.getElementById('numTopics').value),
                 numSubtopics: parseInt(document.getElementById('numSubtopics').value),
@@ -1360,9 +1441,9 @@
                 const chars = block.length;
                 const words = block.split(/\s+/).filter(w => w.length > 0).length;
                 html += `
-                    <div style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-left: 4px solid #667eea; border-radius: 4px;">
-                        <div style="font-weight: bold; color: #667eea; margin-bottom: 5px;">
-                            📦 Bloco ${i + 1} | ${chars} chars | ${words} palavras
+                    <div style="margin-bottom: 15px; padding: 12px; background: #fafafa; border-left: 2px solid #000000; border-radius: 0;">
+                        <div style="font-weight: 500; color: #000000; margin-bottom: 5px;">
+                            Bloco ${i + 1} | ${chars} chars | ${words} palavras
                         </div>
                         <div style="white-space: pre-wrap; color: #333;">${block}</div>
                     </div>
@@ -1715,6 +1796,7 @@
 
             const modelo = modeloDocumentosInicio.value;
             const modeloTakes = modeloTakesInicio.value;
+            const tituloArquivo = getTituloArquivo(); // Nome base dos arquivos
 
             try {
                 // PASSO 1: Dividir em blocos
@@ -1724,7 +1806,7 @@
 
                 // Download blocos.txt
                 const blocosTexto = currentBlocks.map((bloco, i) => `BLOCO ${i + 1}\n${bloco}`).join('\n\n');
-                downloadFile('blocos.txt', blocosTexto);
+                downloadFile(`${tituloArquivo}_blocos.txt`, blocosTexto);
 
                 await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -1748,7 +1830,7 @@
                     wordCount: trilhaData.trilha.split(/\s+/).filter(w => w.length > 0).length
                 });
 
-                downloadFile('02_Trilha_Sonora.txt', trilhaData.trilha);
+                downloadFile(`${tituloArquivo}_trilha_sonora.txt`, trilhaData.trilha);
                 addMessage('Sistema', `✅ Trilha sonora gerada! (~$${trilhaData.custoEstimado})`, 'system');
                 updateCharCounters();
 
@@ -1772,7 +1854,7 @@
                     wordCount: persData.personagensTexto.split(/\s+/).filter(w => w.length > 0).length
                 });
 
-                downloadFile('04_Personagens_Descricoes.txt', persData.personagensTexto);
+                downloadFile(`${tituloArquivo}_personagens.txt`, persData.personagensTexto);
                 addMessage('Sistema', `✅ ${persData.numPersonagens} personagens gerados! (~$${persData.custoEstimado})`, 'system');
 
                 // Habilitar botão de takes manual
@@ -1797,7 +1879,7 @@
                     srtContent += `${index + 1}\n${formatSrtTimestamp(startTime)} --> ${formatSrtTimestamp(endTime)}\n${text}\n\n`;
                     currentTime = endTime + pauseTime;
                 });
-                downloadFile('roteiro.srt', srtContent.trim());
+                downloadFile(`${tituloArquivo}.srt`, srtContent.trim());
                 addMessage('Sistema', `✅ SRT gerado com ${currentBlocks.length} blocos!`, 'system');
 
                 // PASSO 5: Gerar Takes (em grupos de 40 - otimizado custo vs segurança)
@@ -1806,49 +1888,78 @@
                 let todosTakes = [];
                 let ultimoCustoTakes = '0.025';
 
+                console.log(`🎬 Starting takes generation: ${currentBlocks.length} blocks, ${numGrupos} groups`);
+                addMessage('Sistema', `🎬 Iniciando geração de ${currentBlocks.length} takes em ${numGrupos} grupo(s)...`, 'system');
+
                 for (let g = 0; g < numGrupos; g++) {
-                    const inicio = g * BLOCOS_POR_GRUPO;
-                    const fim = Math.min(inicio + BLOCOS_POR_GRUPO, currentBlocks.length);
-                    const blocosGrupo = currentBlocks.slice(inicio, fim);
+                    try {
+                        const inicio = g * BLOCOS_POR_GRUPO;
+                        const fim = Math.min(inicio + BLOCOS_POR_GRUPO, currentBlocks.length);
+                        const blocosGrupo = currentBlocks.slice(inicio, fim);
 
-                    // Atualizar progresso: 85% a 100% distribuído entre os grupos
-                    const progressoParcial = 85 + ((g + 1) / numGrupos) * 15;
-                    updateProgress(Math.round(progressoParcial), `🎬 Gerando takes ${inicio+1}-${fim}...`);
-                    addMessage('Sistema', `[🎬 5/5 - Grupo ${g+1}/${numGrupos}] Gerando takes ${inicio+1}-${fim}... (~20s)`, 'system');
+                        console.log(`📦 Processing group ${g+1}/${numGrupos}: blocks ${inicio+1}-${fim} (${blocosGrupo.length} blocks)`);
 
-                    const takesRes = await fetch('/api/gerar-takes', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            blocos: blocosGrupo,
-                            personagens: currentPersonagens,
-                            modelo: modeloTakes,
-                            offset: inicio,
-                            language
-                        })
-                    });
-                    const takesData = await takesRes.json();
-                    if (takesData.error) {
-                        addMessage('Erro', `Erro no grupo ${g+1}: ${takesData.error}`, 'error');
-                        throw new Error(takesData.error);
+                        // Atualizar progresso: 85% a 100% distribuído entre os grupos
+                        const progressoParcial = 85 + ((g + 1) / numGrupos) * 15;
+                        updateProgress(Math.round(progressoParcial), `🎬 Gerando takes ${inicio+1}-${fim}...`);
+                        addMessage('Sistema', `[🎬 5/5 - Grupo ${g+1}/${numGrupos}] Gerando takes ${inicio+1}-${fim} (${blocosGrupo.length} blocos)... (~20s)`, 'system');
+
+                        const takesRes = await fetch('/api/gerar-takes', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                blocos: blocosGrupo,
+                                personagens: currentPersonagens,
+                                modelo: modeloTakes,
+                                offset: inicio,
+                                language
+                            })
+                        });
+
+                        console.log(`📡 Response status for group ${g+1}: ${takesRes.status}`);
+
+                        if (!takesRes.ok) {
+                            const errorText = await takesRes.text();
+                            console.error(`❌ HTTP error in group ${g+1}:`, errorText);
+                            addMessage('Erro', `❌ Erro HTTP no grupo ${g+1}/${numGrupos}: ${takesRes.status}`, 'error');
+                            throw new Error(`HTTP ${takesRes.status}: ${errorText}`);
+                        }
+
+                        const takesData = await takesRes.json();
+                        console.log(`✅ Group ${g+1} data received:`, takesData.numTakes, 'takes');
+
+                        if (takesData.error) {
+                            console.error(`❌ API error in group ${g+1}:`, takesData.error);
+                            addMessage('Erro', `❌ Erro no grupo ${g+1}/${numGrupos}: ${takesData.error}`, 'error');
+                            throw new Error(takesData.error);
+                        }
+
+                        // Mostrar preview dos takes gerados (primeiros 500 chars)
+                        const preview = takesData.takesCompleto.substring(0, 500) + '...';
+                        addMessage(`🎬 Takes ${inicio+1}-${fim}`, preview, 'assistant', {
+                            charCount: takesData.takesCompleto.length
+                        });
+
+                        todosTakes.push(takesData.takesCompleto);
+                        ultimoCustoTakes = takesData.custoEstimado;
+                        addMessage('Sistema', `✅ Takes ${inicio+1}-${fim} gerados! (${takesData.numTakes} takes, ${takesData.takesCompleto.length} caracteres)`, 'system');
+                        console.log(`✅ Group ${g+1}/${numGrupos} completed successfully`);
+                        updateCharCounters();
+
+                    } catch (groupError) {
+                        console.error(`❌ Fatal error in group ${g+1}/${numGrupos}:`, groupError);
+                        addMessage('Erro', `❌ Erro fatal no grupo ${g+1}/${numGrupos}: ${groupError.message}. Interrompendo geração de takes.`, 'error');
+                        throw groupError; // Re-throw to stop the automatic mode
                     }
-
-                    // Mostrar preview dos takes gerados (primeiros 500 chars)
-                    const preview = takesData.takesCompleto.substring(0, 500) + '...';
-                    addMessage(`🎬 Takes ${inicio+1}-${fim}`, preview, 'assistant', {
-                        charCount: takesData.takesCompleto.length
-                    });
-
-                    todosTakes.push(takesData.takesCompleto);
-                    ultimoCustoTakes = takesData.custoEstimado;
-                    addMessage('Sistema', `✅ Takes ${inicio+1}-${fim} gerados! (${takesData.numTakes} takes)`, 'system');
-                    updateCharCounters();
                 }
+
+                console.log(`✅ All ${numGrupos} groups completed! Total takes: ${todosTakes.length} files`);
 
                 const takesCompleto = todosTakes.join('\n\n');
                 currentFiles.takes = takesCompleto;
-                downloadFile('05_Takes_Prompts.txt', takesCompleto);
-                addMessage('Sistema', `✅ Total: ${currentBlocks.length} takes gerados!`, 'system');
+                downloadFile(`${tituloArquivo}_takes.txt`, takesCompleto);
+                addMessage('Sistema', `✅ TAKES COMPLETOS: ${currentBlocks.length} takes gerados em ${numGrupos} grupo(s)!`, 'system');
+                addMessage('Sistema', `📥 Arquivo "${tituloArquivo}_takes.txt" baixado automaticamente!`, 'system');
 
                 // Sucesso!
                 updateProgress(100, '✅ COMPLETO!');
@@ -1856,9 +1967,14 @@
                                    parseFloat(persData.custoEstimado) +
                                    (parseFloat(ultimoCustoTakes) * numGrupos)).toFixed(3);
                 addMessage('Sistema', `💰 Custo dos documentos: ~$${custoTotal}`, 'system');
+                addMessage('Sistema', `🎉 GERAÇÃO AUTOMÁTICA FINALIZADA COM SUCESSO!`, 'system');
+                addMessage('Sistema', `📦 Todos os 5 arquivos foram baixados: Trilha Sonora, Personagens, SRT, Blocos e Takes!`, 'system');
 
             } catch (error) {
-                addMessage('Erro', `Erro ao gerar documentos: ${error.message}`, 'error');
+                console.error('❌ Fatal error in automatic mode:', error);
+                addMessage('Erro', `❌ Erro ao gerar documentos: ${error.message}`, 'error');
+                addMessage('Sistema', `⚠️ Verifique o console (F12) para mais detalhes do erro.`, 'system');
+                updateProgress(0, '❌ Erro na geração');
             }
         }
 

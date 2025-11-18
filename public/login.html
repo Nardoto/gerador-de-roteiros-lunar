@@ -12,8 +12,8 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -23,8 +23,9 @@
 
         .login-container {
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
             padding: 40px;
             width: 100%;
             max-width: 400px;
@@ -32,16 +33,20 @@
 
         h1 {
             text-align: center;
-            color: #333;
+            color: #000000;
             margin-bottom: 10px;
-            font-size: 28px;
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
             text-align: center;
-            color: #666;
+            color: #666666;
             margin-bottom: 30px;
-            font-size: 14px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .input-group {
@@ -51,89 +56,89 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
-            font-weight: 600;
-            font-size: 14px;
+            color: #000000;
+            font-weight: 500;
+            font-size: 13px;
         }
 
         input {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: all 0.3s ease;
+            padding: 12px;
+            border: 1px solid #d0d0d0;
+            border-radius: 0;
+            font-size: 14px;
+            font-family: inherit;
+            background: #ffffff;
+            transition: border-color 0.2s;
         }
 
         input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #000000;
         }
 
         button {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #000000;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 0;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: background 0.2s;
             margin-top: 10px;
+            letter-spacing: 0.5px;
         }
 
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
+            background: #333333;
         }
 
         button:disabled {
-            opacity: 0.6;
+            opacity: 0.4;
             cursor: not-allowed;
-            transform: none;
         }
 
         .error-message {
-            background: #ffebee;
-            color: #c62828;
+            background: #fafafa;
+            color: #000000;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 0;
             margin-bottom: 20px;
-            font-size: 14px;
+            font-size: 13px;
             display: none;
-            border-left: 4px solid #c62828;
+            border: 1px solid #d0d0d0;
+            border-left: 2px solid #000000;
         }
 
         .success-message {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: #fafafa;
+            color: #000000;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 0;
             margin-bottom: 20px;
-            font-size: 14px;
+            font-size: 13px;
             display: none;
-            border-left: 4px solid #2e7d32;
+            border: 1px solid #d0d0d0;
+            border-left: 2px solid #000000;
         }
 
         .footer {
             text-align: center;
             margin-top: 20px;
-            color: #666;
-            font-size: 13px;
+            color: #666666;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h1>Gerador de Roteiros</h1>
-        <p class="subtitle">Faça login para acessar</p>
+        <h1>Script Generator</h1>
+        <p class="subtitle">Login to Access</p>
 
         <div id="errorMessage" class="error-message"></div>
         <div id="successMessage" class="success-message"></div>
@@ -153,7 +158,7 @@
         </form>
 
         <div class="footer">
-            Gerador Profissional de Roteiros v1.0
+            Script Generator v1.0
         </div>
     </div>
 
@@ -216,10 +221,10 @@
                 if (data.success) {
                     // Salvar token no localStorage
                     localStorage.setItem('authToken', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('user', data.user.username || username);
 
                     // Mostrar sucesso
-                    successMessage.textContent = `Bem-vindo, ${data.user.username}! Redirecionando...`;
+                    successMessage.textContent = `Welcome, ${data.user.username || username}! Redirecting...`;
                     successMessage.style.display = 'block';
 
                     // Redirecionar após 1 segundo

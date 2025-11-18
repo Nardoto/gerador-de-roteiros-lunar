@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npm start)",
       "Bash(curl:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(api/gerar.js.backup)",
+      "Bash(copy /Y apigerar.js.backup apigerar.js)"
     ],
     "deny": [],
     "ask": []

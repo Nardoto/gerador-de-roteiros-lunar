@@ -33,11 +33,25 @@ module.exports = async (req, res) => {
     };
     const outputLanguage = languageMap[language || 'pt'];
 
-    // Format blocks for prompt (using offset for correct numbering)
-    const blocosNumerados = blocos.map((bloco, i) => `BLOCK ${offsetNumero + i + 1}:\n${bloco}`).join('\n\n');
+    console.log(`\n🎬 Generating takes for ${blocos.length} blocks...`);
 
-    // ALL PROMPTS IN ENGLISH - With specific historical context
-    const prompt = `Analyze the historical period of blocks and create ${blocos.length} takes for video AI in JSON.
+    // DIVIDE IN GROUPS OF 10 BLOCKS FOR RELIABILITY
+    const BLOCOS_POR_GRUPO = 10;
+    const allTakes = [];
+
+    for (let i = 0; i < blocos.length; i += BLOCOS_POR_GRUPO) {
+      const grupoAtual = blocos.slice(i, i + BLOCOS_POR_GRUPO);
+      const offsetGrupo = offsetNumero + i;
+      const numGrupo = Math.floor(i / BLOCOS_POR_GRUPO) + 1;
+      const totalGrupos = Math.ceil(blocos.length / BLOCOS_POR_GRUPO);
+
+      console.log(`📦 Group ${numGrupo}/${totalGrupos}: ${grupoAtual.length} blocks (${offsetGrupo + 1}-${offsetGrupo + grupoAtual.length})`);
+
+      // Format blocks for prompt (using offset for correct numbering)
+      const blocosNumerados = grupoAtual.map((bloco, idx) => `BLOCK ${offsetGrupo + idx + 1}:\n${bloco}`).join('\n\n');
+
+      // ALL PROMPTS IN ENGLISH - With specific historical context
+      const prompt = `Analyze the historical period of blocks and create ${grupoAtual.length} takes for video AI in JSON.
 
 FORMAT (80-120 words each):
 {
@@ -59,44 +73,62 @@ CRITICAL RULES:
 - Describe period clothing, architecture and environment of correct era
 - End with "historically accurate for [specific period]"
 - character_anchors: EXACT names or []
-- Return ONLY JSON array
+- Return ONLY JSON array, no extra text
 
 BLOCKS:
 ${blocosNumerados}
 
-Return JSON array with ${blocos.length} takes with precise historicity.`;
+Return JSON array with ${grupoAtual.length} takes with precise historicity.`;
 
-    const response = await anthropic.messages.create({
-      model: modeloUsar,
-      max_tokens: calcMaxTokens(blocos.length * 180),
-      messages: [{ role: 'user', content: prompt }]
-    });
+      // Each take needs ~200 tokens (80-120 words + JSON structure)
+      const maxTokensNeeded = grupoAtual.length * 250;  // 250 tokens per take (safe margin)
 
-    let takesJson = response.content[0].text;
+      const response = await anthropic.messages.create({
+        model: modeloUsar,
+        max_tokens: maxTokensNeeded,
+        messages: [{ role: 'user', content: prompt }]
+      });
 
-    // Extract JSON from response (in case there's additional text)
-    const jsonMatch = takesJson.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      takesJson = jsonMatch[0];
+      let takesJson = response.content[0].text.trim();
+
+      console.log(`📄 Raw response length: ${takesJson.length} chars`);
+
+      // Extract JSON from response (in case there's additional text)
+      const jsonMatch = takesJson.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        takesJson = jsonMatch[0];
+      }
+
+      // Try to parse directly first (Claude usually returns valid JSON)
+      let takesGrupo;
+      try {
+        takesGrupo = JSON.parse(takesJson);
+        console.log(`✅ Group ${numGrupo}: ${takesGrupo.length} takes parsed successfully`);
+      } catch (parseError) {
+        console.log(`⚠️ First parse failed, trying cleanup...`);
+
+        // Only clean if first parse fails
+        const cleanedJson = takesJson
+          .replace(/,\s*}/g, '}')
+          .replace(/,\s*\]/g, ']')
+          .replace(/}\s*{/g, '},{');
+
+        try {
+          takesGrupo = JSON.parse(cleanedJson);
+          console.log(`✅ Group ${numGrupo}: ${takesGrupo.length} takes parsed after cleanup`);
+        } catch (secondError) {
+          console.error(`❌ Error parsing takes JSON (group ${numGrupo}):`, secondError.message);
+          console.error('Raw response (first 500 chars):', takesJson.substring(0, 500));
+          console.error('Raw response (last 500 chars):', takesJson.substring(takesJson.length - 500));
+          throw new Error(`Invalid JSON in group ${numGrupo}. Claude returned malformed data.`);
+        }
+      }
+
+      console.log(`✅ Group ${numGrupo}: ${takesGrupo.length} takes generated`);
+      allTakes.push(...takesGrupo);
     }
 
-    // Clean possible JSON problems
-    takesJson = takesJson
-      .replace(/,\s*}/g, '}')
-      .replace(/,\s*\]/g, ']')
-      .replace(/}\s*{/g, '},{')
-      .replace(/\n/g, ' ')
-      .replace(/\r/g, '')
-      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-      .replace(/,(\s*[}\]])/g, '$1');
-
-    let takes;
-    try {
-      takes = JSON.parse(takesJson);
-    } catch (parseError) {
-      console.error('❌ Error parsing takes JSON:', parseError.message);
-      throw new Error(`Invalid JSON returned by AI. Try with fewer blocks.`);
-    }
+    const takes = allTakes;
 
     // Function to normalize and find character
     function findCharacter(nomeBuscado, personagensObj) {
