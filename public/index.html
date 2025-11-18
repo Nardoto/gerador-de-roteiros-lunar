@@ -1066,7 +1066,14 @@
                                         updateProgress(100, '✅ Geração completa!');
 
                                         // Verificar se QUALQUER um dos checkboxes está marcado
+                                        console.log('🔍 DEBUG Modo Automático:');
+                                        console.log('   modoAutomaticoInicio existe?', !!modoAutomaticoInicio);
+                                        console.log('   modoAutomaticoInicio.checked?', modoAutomaticoInicio ? modoAutomaticoInicio.checked : 'N/A');
+                                        console.log('   modoAutomatico existe?', !!modoAutomatico);
+                                        console.log('   modoAutomatico.checked?', modoAutomatico ? modoAutomatico.checked : 'N/A');
+
                                         const modoAutoAtivo = modoAutomaticoInicio.checked || (modoAutomatico && modoAutomatico.checked);
+                                        console.log('   ✅ Modo automático ativo?', modoAutoAtivo);
 
                                         if (modoAutoAtivo) {
                                             addMessage('Sistema', '✅ Roteiro completo! Iniciando geração automática de documentos...', 'system');
