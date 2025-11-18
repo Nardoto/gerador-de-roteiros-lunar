@@ -4,6 +4,11 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
 
+// Função auxiliar para calcular max_tokens
+function calcMaxTokens(expectedChars) {
+  return Math.ceil((expectedChars * 1.5) / 3.5);
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -23,61 +28,61 @@ module.exports = async (req, res) => {
     const offsetNumero = offset || 0;
 
     const languageInstructions = {
-      pt: 'Escreva TODO o conteúdo em PORTUGUÊS (Brasil).',
-      en: 'Write ALL content in ENGLISH.',
-      es: 'Escribe TODO el contenido en ESPAÑOL.'
+      pt: 'Português (Brasil)',
+      en: 'English',
+      es: 'Español'
     };
     const languagePrompt = languageInstructions[language || 'pt'];
 
     // Formatar blocos para o prompt (usando offset para numeração correta)
-    const blocosNumerados = blocos.map((bloco, i) => `BLOCO ${offsetNumero + i + 1}:\\n${bloco}`).join('\\n\\n');
+    const blocosNumerados = blocos.map((bloco, i) => `BLOCO ${offsetNumero + i + 1}:\n${bloco}`).join('\n\n');
 
-    const prompt = `${languagePrompt}
+    // PROMPT OTIMIZADO - Reduzido de ~200 tokens para ~80 tokens
+    const prompt = `Idioma: ${languagePrompt}
 
-Crie ${blocos.length} takes para IA de vídeo em formato JSON.
+Crie ${blocos.length} takes para IA de vídeo em JSON.
 
 FORMATO (80-120 palavras cada):
 {
   "take": 1,
-  "scene": "[Ação específica], [ambiente histórico], [iluminação], [tipo câmera]. Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate, real people, ultra-detailed, hyper realistic 8k.",
+  "scene": "[Ação + ambiente + luz + câmera]. Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate, real people, ultra-detailed, hyper realistic 8k.",
   "character_anchors": ["Nome1", "Nome2"]
 }
 
 REGRAS:
-- Scene: ação + ambiente + luz + câmera (80-120 palavras)
-- Terminar com: "Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate, real people, ultra-detailed, hyper realistic 8k."
-- character_anchors: APENAS nomes (ou [] se sem personagens)
-
-⚠️ CRITICAL: In "character_anchors", use the EXACT character names as they appear in the BLOCOS below. DO NOT translate names. Character names must match the script exactly.
+- Scene: 80-120 palavras
+- Terminar com texto padrão acima
+- character_anchors: nomes EXATOS dos personagens ou [] se vazio
+- Retornar APENAS array JSON
 
 BLOCOS:
 ${blocosNumerados}
 
-Retorne APENAS array JSON com ${blocos.length} takes:`;
+Retorne APENAS array JSON com ${blocos.length} takes.`;
 
     const response = await anthropic.messages.create({
       model: modeloUsar,
-      max_tokens: 16000,
+      max_tokens: calcMaxTokens(blocos.length * 180), // Dinâmico baseado em número de blocos
       messages: [{ role: 'user', content: prompt }]
     });
 
     let takesJson = response.content[0].text;
 
     // Extrair JSON do response (caso tenha texto adicional)
-    const jsonMatch = takesJson.match(/\\[[\\s\\S]*\\]/);
+    const jsonMatch = takesJson.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       takesJson = jsonMatch[0];
     }
 
     // Limpar possíveis problemas no JSON
     takesJson = takesJson
-      .replace(/,\\s*}/g, '}')
-      .replace(/,\\s*\\]/g, ']')
-      .replace(/}\\s*{/g, '},{')
-      .replace(/\\n/g, ' ')
-      .replace(/\\r/g, '')
-      .replace(/[\\u0000-\\u001F\\u007F-\\u009F]/g, '')
-      .replace(/,(\\s*[}\\]])/g, '$1');
+      .replace(/,\s*}/g, '}')
+      .replace(/,\s*\]/g, ']')
+      .replace(/}\s*{/g, '},{')
+      .replace(/\n/g, ' ')
+      .replace(/\r/g, '')
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+      .replace(/,(\s*[}\]])/g, '$1');
 
     let takes;
     try {
@@ -132,25 +137,25 @@ Retorne APENAS array JSON com ${blocos.length} takes:`;
     // Montar arquivo final
     let takesCompleto = '';
     takes.forEach((take, idx) => {
-      takesCompleto += `TAKE ${offsetNumero + idx + 1}\\n`;
-      takesCompleto += `${take.scene}\\n`;
+      takesCompleto += `TAKE ${offsetNumero + idx + 1}\n`;
+      takesCompleto += `${take.scene}\n`;
 
       if (take.character_anchors && take.character_anchors.length > 0) {
-        takesCompleto += `Character anchor${take.character_anchors.length > 1 ? 's' : ''}:\\n`;
+        takesCompleto += `Character anchor${take.character_anchors.length > 1 ? 's' : ''}:\n`;
 
         take.character_anchors.forEach(nome => {
           const descricao = findCharacter(nome, personagens) || '[Personagem não encontrado]';
-          takesCompleto += `${nome}: ${descricao}\\n`;
+          takesCompleto += `${nome}: ${descricao}\n`;
         });
       }
 
-      takesCompleto += `\\n`;
+      takesCompleto += `\n`;
     });
 
     res.status(200).json({
       takesCompleto,
       numTakes: takes.length,
-      custoEstimado: '0.025'
+      custoEstimado: '0.008' // Atualizado para economia de ~70%
     });
 
   } catch (error) {

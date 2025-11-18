@@ -4,6 +4,11 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
 
+// Função auxiliar para calcular max_tokens
+function calcMaxTokens(expectedChars) {
+  return Math.ceil((expectedChars * 1.5) / 3.5);
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -22,53 +27,46 @@ module.exports = async (req, res) => {
     const modeloUsar = modelo || 'claude-sonnet-4-20250514';
 
     const languageInstructions = {
-      pt: 'Escreva TODO o conteúdo em PORTUGUÊS (Brasil).',
-      en: 'Write ALL content in ENGLISH.',
-      es: 'Escribe TODO el contenido en ESPAÑOL.'
+      pt: 'Português (Brasil)',
+      en: 'English',
+      es: 'Español'
     };
     const languagePrompt = languageInstructions[language || 'pt'];
 
-    const prompt = `Você é especialista em trilha sonora para documentários.
+    // PROMPT OTIMIZADO - Reduzido de ~350 tokens para ~120 tokens
+    const prompt = `Idioma: ${languagePrompt}
 
-${languagePrompt}
+Crie arquivo de trilha sonora para o roteiro abaixo.
 
-Analise o roteiro abaixo e crie o arquivo de trilha sonora seguindo este formato:
+FORMATO para cada seção (Hook, Tópicos, Conclusão):
 
+SEÇÃO [nome]
+Sentimento [emoção e atmosfera]
+Keywords [keyword1] [keyword2] [keyword3] [keyword4]
+Mood [3-5 adjetivos em INGLÊS]
+Intensidade [Baixa ou Média ou Alta ou Crescente]
+Notas [quando mudar/crescer]
+
+REGRAS:
+- Keywords em INGLÊS específicas (ex: documentary suspense)
+- Mood: 3-5 adjetivos em INGLÊS
+- Sem caracteres especiais (asteriscos, aspas, etc)
+- Alinhar com objetivo de cada seção
+
+Bibliotecas: Epidemic Sound, Artlist, AudioJungle, YouTube Audio Library
+
+ROTEIRO:
+${roteiro}
+
+Inicie com:
 TRILHA SONORA E ORIENTAÇÕES MUSICAIS
 
 INSTRUÇÕES PARA BUSCA DE MÚSICAS
-Este documento contém orientações para encontrar músicas em bibliotecas como
-- Epidemic Sound
-- Artlist
-- AudioJungle
-- YouTube Audio Library
-
-Para cada seção use as palavras-chave (keywords) fornecidas para buscar.
-Priorize músicas que correspondam ao sentimento (mood) descrito.
-
-Para cada seção do roteiro (Hook + Atos e Tópicos + Conclusão) forneça
-
-SEÇÃO (Nome da seção)
-Sentimento (Descrever emoção e atmosfera desejada)
-Keywords (keyword1) (keyword2) (keyword3) (keyword4)
-Mood (3-5 adjetivos em INGLÊS separados por vírgula)
-Intensidade (Baixa ou Média ou Alta ou Crescente)
-Notas (Observações sobre quando a música deve mudar crescer etc)
-
-DIRETRIZES
-- Keywords em INGLÊS e específicas como documentary suspense não só suspense
-- Mood com 3-5 adjetivos em INGLÊS
-- Alinhar com objetivo de cada seção
-- Tensão igual a suspenseful e Revelação igual a crescente
-- Use APENAS letras números espaços parênteses e traços
-- NÃO use caracteres especiais como asteriscos cerquilha colchetes aspas dois-pontos ponto e vírgula
-
-ROTEIRO
-${roteiro}`;
+Use keywords para buscar. Priorize músicas que correspondam ao mood.`;
 
     const response = await anthropic.messages.create({
       model: modeloUsar,
-      max_tokens: 2000,
+      max_tokens: calcMaxTokens(1500), // ~650 tokens ao invés de 2000
       messages: [{ role: 'user', content: prompt }]
     });
 
@@ -76,8 +74,8 @@ ${roteiro}`;
 
     res.status(200).json({
       trilha,
-      custoEstimado: '0.039',
-      numSecoes: trilha.split('SEÇÃO:').length - 1
+      custoEstimado: '0.012', // Atualizado para economia de ~70%
+      numSecoes: trilha.split('SEÇÃO').length - 1
     });
 
   } catch (error) {
