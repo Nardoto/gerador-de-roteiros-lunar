@@ -45,8 +45,15 @@ Analise o período histórico dos blocos e crie ${blocos.length} takes para IA d
 FORMATO (80-120 palavras cada):
 {
   "take": 1,
-  "scene": "[Ação + ambiente + luz + câmera]. IMPORTANTE: Incluir período histórico específico (ex: ancient Egypt 1400 BC, first century Judea, Iron Age Israel) com detalhes de época (vestuário, arquitetura, paisagem típica). Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate for [período], real people, ultra-detailed, hyper realistic 8k.",
+  "scene": "[Ação + ambiente + luz + câmera + vestuário de época + arquitetura típica do período]. Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate for [período histórico específico ex: ancient Egypt 1400 BC], real people, ultra-detailed, hyper realistic 8k.",
   "character_anchors": ["Nome1", "Nome2"]
+}
+
+EXEMPLO:
+{
+  "take": 1,
+  "scene": "Moses wearing simple linen robes typical of Hebrew slaves raises wooden staff toward churning waters of Red Sea, Egyptian chariots pursuing in background, desert landscape with palm trees, mud brick structures visible, golden hour lighting. Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate for ancient Egypt 1400 BC, real people, ultra-detailed, hyper realistic 8k.",
+  "character_anchors": ["Moses"]
 }
 
 REGRAS CRÍTICAS:
