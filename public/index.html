@@ -725,6 +725,12 @@
         const modeloDocumentosInicio = document.getElementById('modeloDocumentosInicio');
         const modeloTakesInicio = document.getElementById('modeloTakesInicio');
 
+        // Sincronizar os dois checkboxes de modo automático
+        modoAutomaticoInicio.addEventListener('change', () => {
+            const modoAuto = document.getElementById('modoAutomatico');
+            if (modoAuto) modoAuto.checked = modoAutomaticoInicio.checked;
+        });
+
         // Ferramentas
         const tools = document.getElementById('tools');
         const divideByCharsBtn = document.getElementById('divideByCharsBtn');
@@ -744,6 +750,13 @@
         const btnAutomaticoContainer = document.getElementById('btnAutomaticoContainer');
         const aiStatus = document.getElementById('aiStatus');
         const aiStatusText = document.getElementById('aiStatusText');
+
+        // Sincronizar checkbox da seção com o do topo
+        if (modoAutomatico) {
+            modoAutomatico.addEventListener('change', () => {
+                modoAutomaticoInicio.checked = modoAutomatico.checked;
+            });
+        }
 
         let currentFiles = {};
         let currentBlocks = [];
@@ -1052,7 +1065,10 @@
                                         // Atualizar progresso para 100%
                                         updateProgress(100, '✅ Geração completa!');
 
-                                        if (modoAutomaticoInicio.checked) {
+                                        // Verificar se QUALQUER um dos checkboxes está marcado
+                                        const modoAutoAtivo = modoAutomaticoInicio.checked || (modoAutomatico && modoAutomatico.checked);
+
+                                        if (modoAutoAtivo) {
                                             addMessage('Sistema', '✅ Roteiro completo! Iniciando geração automática de documentos...', 'system');
 
                                             // Gerar documentos automaticamente (sem await pois não estamos em função async)
