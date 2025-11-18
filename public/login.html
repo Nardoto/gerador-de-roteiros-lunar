@@ -128,30 +128,6 @@
             color: #666;
             font-size: 13px;
         }
-
-        .password-container {
-            position: relative;
-        }
-
-        .password-container input {
-            padding-right: 45px;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #666;
-            font-size: 20px;
-            user-select: none;
-            transition: color 0.2s ease;
-        }
-
-        .toggle-password:hover {
-            color: #667eea;
-        }
     </style>
 </head>
 <body>
@@ -170,17 +146,14 @@
 
             <div class="input-group">
                 <label for="password">Senha</label>
-                <div class="password-container">
-                    <input type="password" id="password" name="password" required>
-                    <span class="toggle-password" id="togglePassword">👁️</span>
-                </div>
+                <input type="password" id="password" name="password" required>
             </div>
 
             <button type="submit" id="loginBtn">Entrar</button>
         </form>
 
         <div class="footer">
-            Gerador Profissional de Roteiros v1.1
+            Gerador Profissional de Roteiros v1.0
         </div>
     </div>
 
@@ -189,15 +162,6 @@
         const loginBtn = document.getElementById('loginBtn');
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
-        const passwordInput = document.getElementById('password');
-        const togglePassword = document.getElementById('togglePassword');
-
-        // Toggle mostrar/ocultar senha
-        togglePassword.addEventListener('click', () => {
-            const type = passwordInput.type === 'password' ? 'text' : 'password';
-            passwordInput.type = type;
-            togglePassword.textContent = type === 'password' ? '👁️' : '🔒';
-        });
 
         // Verificar se já está logado
         const token = localStorage.getItem('authToken');

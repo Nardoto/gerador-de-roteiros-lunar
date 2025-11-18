@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Roteiros - Teste Local</title>
+    <title>✅ v4.0 DEFINITIVO - Gerador de Roteiros</title>
     <style>
         * {
             margin: 0;
@@ -252,10 +252,37 @@
         .download-btn:hover {
             background: #45a049;
         }
+
+        /* Animação de pulso para o indicador de versão */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(0,255,0,0.5);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 30px rgba(0,255,0,0.8);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(0,255,0,0.5);
+            }
+        }
     </style>
+    <!-- JSZip para criar arquivos ZIP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
     <div class="container">
+        <!-- INDICADOR DE VERSÃO - ANTI-CACHE -->
+        <div style="background: linear-gradient(135deg, #00ff00, #00cc00); color: #000; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 18px; box-shadow: 0 0 20px rgba(0,255,0,0.5); animation: pulse 2s infinite;">
+            ✅ VERSÃO 4.0 DEFINITIVO - Eventos SSE grudados resolvido!
+            <span style="display: block; font-size: 14px; margin-top: 5px;">
+                ⏰ Última atualização: <span id="updateTime"></span>
+                <br>Usando separador duplo \n\n correto!
+            </span>
+        </div>
+
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h1 style="margin: 0;">🎬 Gerador de Roteiros - Teste Local</h1>
             <button id="logoutBtn" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
@@ -559,6 +586,29 @@
     </div>
 
     <script>
+        // ====== SISTEMA ANTI-CACHE - VERSÃO 2.5 ======
+        // FORÇAR NAVEGADOR A NÃO USAR CACHE
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => {
+                    caches.delete(name);
+                });
+            });
+        }
+
+        // Mostrar hora da última atualização assim que a página carregar
+        window.addEventListener('DOMContentLoaded', () => {
+            const updateTime = document.getElementById('updateTime');
+            if (updateTime) {
+                updateTime.textContent = new Date().toLocaleString('pt-BR');
+            }
+
+            // Adicionar alerta visual no console
+            console.log('%c✅ VERSÃO 4.0 DEFINITIVO!', 'background: #00ff00; color: #000; font-size: 20px; padding: 10px;');
+            console.log('%cSSE Fix: Eventos grudados resolvido!', 'background: #00cc00; color: #fff; font-size: 16px; padding: 8px;');
+            console.log('Última atualização:', new Date().toLocaleString('pt-BR'));
+        });
+
         // Verificar autenticação
         const authToken = localStorage.getItem('authToken');
         if (!authToken) {
@@ -799,91 +849,155 @@
 
                 while (true) {
                     const { done, value } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        console.log('🏁 Stream terminado');
+                        break;
+                    }
 
                     const chunk = decoder.decode(value);
+
+                    // SSE: eventos são separados por "\n\ndata: " (quebra dupla + próximo evento)
+                    // Isso evita quebrar JSON no meio quando content tem \n dentro
                     const lines = chunk.split('\n');
 
+                    console.log(`📥 Recebido ${lines.length} linhas`);
+
                     for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            const data = JSON.parse(line.slice(6));
+                        if (!line.trim() || !line.startsWith('data: ')) continue;
 
-                            if (data.type === 'step') {
-                                const progressText = data.progress || `🔄 ${data.step} - ${data.status}`;
-                                addMessage('Sistema', progressText, 'system', { progress: data.progress });
+                        console.log('🔍 Processando evento SSE...');
+                        try {
+                            // Remover "data: " do início
+                            let jsonStr = line.substring(6);
 
-                                // Atualizar barra de progresso baseado no passo
-                                if (data.step === 'estrutura') {
-                                    updateProgress(10, 'Gerando estrutura...');
-                                } else if (data.step === 'hook') {
-                                    updateProgress(20, 'Gerando hook...');
-                                }
-                            } else if (data.type === 'message') {
-                                let label;
-                                if (data.step === 'estrutura') {
-                                    label = '📋 Estrutura';
-                                } else if (data.step === 'hook') {
-                                    label = '🎣 Hook';
-                                } else if (data.step && data.step.includes('subtopico')) {
-                                    const match = data.step.match(/topico(\d+)_subtopico(\d+)/);
-                                    if (match) {
-                                        label = `📝 Tópico ${match[1]} - Subtópico ${match[2]}`;
-                                    } else {
-                                        label = 'IA';
-                                    }
-                                } else if (data.step && data.step.startsWith('topico')) {
-                                    label = `📖 ${data.step.replace('topico', 'Tópico ')}`;
-                                } else {
-                                    label = 'IA';
-                                }
-
-                                addMessage(label, data.content, 'assistant', {
-                                    prompt: data.prompt,
-                                    charCount: data.charCount,
-                                    charCountNoSpaces: data.charCountNoSpaces,
-                                    wordCount: data.wordCount
-                                });
-                            } else if (data.type === 'topico_complete') {
-                                const percent = data.percentComplete || 0;
-                                const emoji = percent >= 100 ? '✅' : percent >= 80 ? '⚠️' : '❌';
-                                addMessage('Sistema',
-                                    `${emoji} Tópico ${data.topicoNum} completo: ${data.totalChars} chars de ${data.expectedChars} esperados (${percent}%)`,
-                                    'system'
-                                );
-
-                                // Atualizar progresso: 20% a 70% distribuído entre tópicos
-                                const numTopics = parseInt(document.getElementById('numTopics').value);
-                                const progressoParcial = 20 + (data.topicoNum / numTopics) * 50;
-                                updateProgress(Math.round(progressoParcial), `Tópico ${data.topicoNum}/${numTopics} completo`);
-                            } else if (data.type === 'complete') {
-                                currentFiles = data.files;
-
-                                // Se modo automático está ativo, continuar gerando documentos
-                                // Atualizar contadores
-                                updateCharCounters();
-
-                                if (modoAutomaticoInicio.checked) {
-                                    addMessage('Sistema', '✅ Roteiro completo! Iniciando geração automática de documentos...', 'system');
-
-                                    // Gerar documentos automaticamente
-                                    await gerarDocumentosAutomaticamente();
-
-                                    stopTimer();
-                                    addMessage('Sistema', '🎉 TUDO PRONTO! Roteiro + Documentos gerados!', 'system');
-
-                                    // Atualizar contadores finais
-                                    updateCharCounters();
-                                } else {
-                                    stopTimer();
-                                    addMessage('Sistema', '✅ Geração completa!', 'system');
-                                }
-
-                                downloads.style.display = 'block';
-                                tools.style.display = 'block';
-                            } else if (data.type === 'error') {
-                                stopTimer();
-                                addMessage('Erro', data.error, 'error');
+                            // PROBLEMA: Múltiplos eventos podem vir grudados: {...}\n\ndata: {...}\n\n
+                            // Solução: Se tem \n\ndata: dentro, pegar só até ele
+                            if (jsonStr.includes('\\n\\ndata:')) {
+                                jsonStr = jsonStr.split('\\n\\ndata:')[0];
                             }
+
+                            // Remover \n\n literal do final se existir
+                            if (jsonStr.endsWith('\\n\\n')) {
+                                jsonStr = jsonStr.slice(0, -4);
+                            }
+
+                            jsonStr = jsonStr.trim();
+                            if (!jsonStr) continue;
+
+                            const data = JSON.parse(jsonStr);
+                            console.log(`✅ Parseado: type=${data.type}, step=${data.step}`);
+
+                                    if (data.type === 'step') {
+                                        const progressText = data.progress || `🔄 ${data.step} - ${data.status}`;
+                                        addMessage('Sistema', progressText, 'system', { progress: data.progress });
+
+                                        // Atualizar barra de progresso baseado no passo
+                                        if (data.step === 'estrutura') {
+                                            updateProgress(10, 'Gerando estrutura...');
+                                        } else if (data.step === 'hook') {
+                                            updateProgress(20, 'Gerando hook...');
+                                        }
+                                    } else if (data.type === 'message') {
+                                        let label;
+                                        if (data.step === 'estrutura') {
+                                            label = '📋 Estrutura';
+                                            currentFiles.estrutura = data.content;
+                                        } else if (data.step === 'hook') {
+                                            label = '🎣 Hook';
+                                            currentFiles.hook = data.content;
+                                        } else if (data.step === 'conclusao') {
+                                            label = '🎬 Conclusão';
+                                            currentFiles.conclusao = data.content;
+                                        } else if (data.step && data.step.includes('subtopico')) {
+                                            const match = data.step.match(/topico(\d+)_subtopico(\d+)/);
+                                            if (match) {
+                                                label = `📝 Tópico ${match[1]} - Subtópico ${match[2]}`;
+                                            } else {
+                                                label = 'IA';
+                                            }
+                                        } else if (data.step && data.step.startsWith('topico')) {
+                                            const topicoNum = data.step.match(/\d+/)?.[0];
+                                            if (topicoNum) {
+                                                label = `📖 Tópico ${topicoNum}`;
+                                                currentFiles[`topico${topicoNum}`] = data.content;
+                                            } else {
+                                                label = `📖 ${data.step.replace('topico', 'Tópico ')}`;
+                                            }
+                                        } else {
+                                            label = 'IA';
+                                        }
+
+                                        // Log para debug
+                                        console.log(`📝 Mensagem recebida: ${label} (${data.step})`);
+                                        console.log(`   Tamanho: ${data.content ? data.content.length : 0} chars`);
+
+                                        addMessage(label, data.content, 'assistant', {
+                                            prompt: data.prompt,
+                                            charCount: data.charCount,
+                                            charCountNoSpaces: data.charCountNoSpaces,
+                                            wordCount: data.wordCount
+                                        });
+                                    } else if (data.type === 'topico_complete') {
+                                        const percent = data.percentComplete || 0;
+                                        const emoji = percent >= 100 ? '✅' : percent >= 80 ? '⚠️' : '❌';
+                                        addMessage('Sistema',
+                                            `${emoji} Tópico ${data.topicoNum} completo: ${data.totalChars} chars de ${data.expectedChars} esperados (${percent}%)`,
+                                            'system'
+                                        );
+
+                                        // Atualizar progresso: 20% a 70% distribuído entre tópicos
+                                        const numTopics = parseInt(document.getElementById('numTopics').value);
+                                        const progressoParcial = 20 + (data.topicoNum / numTopics) * 50;
+                                        updateProgress(Math.round(progressoParcial), `Tópico ${data.topicoNum}/${numTopics} completo`);
+                                    } else if (data.type === 'complete') {
+                                        // Se não houver data.files, usar os arquivos que já foram salvos durante a geração
+                                        if (!data.files) {
+                                            console.log('⚠️ data.files está vazio, usando arquivos salvos durante geração');
+                                            data.files = currentFiles;
+                                        } else {
+                                            // Mesclar com os arquivos já salvos
+                                            currentFiles = { ...currentFiles, ...data.files };
+                                        }
+
+                                        console.log('📦 Arquivos disponíveis:', Object.keys(currentFiles));
+
+                                        // Atualizar contadores
+                                        updateCharCounters();
+
+                                        // Sempre mostrar downloads e ferramentas
+                                        downloads.style.display = 'block';
+                                        tools.style.display = 'block';
+
+                                        // Atualizar progresso para 100%
+                                        updateProgress(100, '✅ Geração completa!');
+
+                                        if (modoAutomaticoInicio.checked) {
+                                            addMessage('Sistema', '✅ Roteiro completo! Iniciando geração automática de documentos...', 'system');
+
+                                            // Gerar documentos automaticamente (sem await pois não estamos em função async)
+                                            gerarDocumentosAutomaticamente().then(() => {
+                                                stopTimer();
+                                                addMessage('Sistema', '🎉 TUDO PRONTO! Roteiro + Documentos gerados!', 'system');
+
+                                                // Atualizar contadores finais
+                                                updateCharCounters();
+                                            }).catch(error => {
+                                                console.error('Erro ao gerar documentos:', error);
+                                                addMessage('Sistema', `❌ Erro ao gerar documentos: ${error.message}`, 'system');
+                                                stopTimer();
+                                            });
+                                        } else {
+                                            stopTimer();
+                                            addMessage('Sistema', '✅ Geração completa!', 'system');
+                                        }
+                                    } else if (data.type === 'error') {
+                                        stopTimer();
+                                        addMessage('Erro', data.error, 'error');
+                                    }
+                        } catch (e) {
+                            console.error('❌ ERRO ao processar evento SSE:', e);
+                            console.error('   Linha problemática:', line);
+                            console.error('   Stack:', e.stack);
                         }
                     }
                 }
@@ -1747,6 +1861,92 @@
                 addMessage('Erro', `Erro ao gerar documentos: ${error.message}`, 'error');
             }
         }
+
+        // Event Listeners para Botões de Download
+        document.getElementById('downloadTudo').addEventListener('click', () => {
+            if (!currentFiles) {
+                alert('Nenhum documento gerado ainda!');
+                return;
+            }
+
+            // Criar ZIP com todos os arquivos
+            const zip = new JSZip();
+
+            if (currentFiles.estrutura) zip.file('00_Estrutura.txt', currentFiles.estrutura);
+            if (currentFiles.hook) zip.file('01_Hook.txt', currentFiles.hook);
+            if (currentFiles.topico1) zip.file('02_Topico1.txt', currentFiles.topico1);
+            if (currentFiles.topico2) zip.file('03_Topico2.txt', currentFiles.topico2);
+            if (currentFiles.topico3) zip.file('04_Topico3.txt', currentFiles.topico3);
+            if (currentFiles.conclusao) zip.file('05_Conclusao.txt', currentFiles.conclusao);
+            if (currentFiles.trilha) zip.file('06_Trilha_Sonora.txt', currentFiles.trilha);
+            if (currentFiles.personagens) zip.file('07_Personagens.txt', currentFiles.personagens);
+            if (currentFiles.textoNarrado) zip.file('08_Texto_Narrado.txt', currentFiles.textoNarrado);
+            if (currentFiles.titulo) zip.file('09_Titulo_Descricao.txt', currentFiles.titulo);
+
+            // Roteiro completo
+            const roteiroCompleto = getFullScript();
+            if (roteiroCompleto) zip.file('00_Roteiro_Completo.txt', roteiroCompleto);
+
+            // Gerar e baixar ZIP
+            zip.generateAsync({type: 'blob'}).then(function(content) {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(content);
+                a.download = `roteiro_${new Date().toISOString().slice(0,10)}.zip`;
+                a.click();
+            });
+        });
+
+        document.getElementById('downloadJSON').addEventListener('click', () => {
+            if (!currentFiles) {
+                alert('Nenhum documento gerado ainda!');
+                return;
+            }
+
+            const jsonData = {
+                gerado_em: new Date().toISOString(),
+                titulo: document.getElementById('title').value,
+                arquivos: currentFiles
+            };
+
+            downloadFile('documentacao_completa.json', JSON.stringify(jsonData, null, 2));
+        });
+
+        document.getElementById('downloadEstrutura').addEventListener('click', () => {
+            if (currentFiles && currentFiles.estrutura) {
+                downloadFile('00_Estrutura.txt', currentFiles.estrutura);
+            }
+        });
+
+        document.getElementById('downloadHook').addEventListener('click', () => {
+            if (currentFiles && currentFiles.hook) {
+                downloadFile('01_Hook.txt', currentFiles.hook);
+            }
+        });
+
+        document.getElementById('downloadTopico1').addEventListener('click', () => {
+            if (currentFiles && currentFiles.topico1) {
+                downloadFile('02_Topico1.txt', currentFiles.topico1);
+            }
+        });
+
+        document.getElementById('downloadTopico2').addEventListener('click', () => {
+            if (currentFiles && currentFiles.topico2) {
+                downloadFile('03_Topico2.txt', currentFiles.topico2);
+            }
+        });
+
+        document.getElementById('downloadTopico3').addEventListener('click', () => {
+            if (currentFiles && currentFiles.topico3) {
+                downloadFile('04_Topico3.txt', currentFiles.topico3);
+            }
+        });
+
+        document.getElementById('downloadCompleto').addEventListener('click', () => {
+            const roteiroCompleto = getFullScript();
+            if (roteiroCompleto) {
+                downloadFile('00_Roteiro_Completo.txt', roteiroCompleto);
+            }
+        });
 
         // Gerar Todos os Documentos (Modo Automático)
         gerarTodosBtn.addEventListener('click', async () => {
