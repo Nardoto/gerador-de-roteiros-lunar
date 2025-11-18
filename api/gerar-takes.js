@@ -37,28 +37,30 @@ module.exports = async (req, res) => {
     // Formatar blocos para o prompt (usando offset para numeração correta)
     const blocosNumerados = blocos.map((bloco, i) => `BLOCO ${offsetNumero + i + 1}:\n${bloco}`).join('\n\n');
 
-    // PROMPT OTIMIZADO - Reduzido de ~200 tokens para ~80 tokens
+    // PROMPT OTIMIZADO - Com contexto histórico específico
     const prompt = `Idioma: ${languagePrompt}
 
-Crie ${blocos.length} takes para IA de vídeo em JSON.
+Analise o período histórico dos blocos e crie ${blocos.length} takes para IA de vídeo em JSON.
 
 FORMATO (80-120 palavras cada):
 {
   "take": 1,
-  "scene": "[Ação + ambiente + luz + câmera]. Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate, real people, ultra-detailed, hyper realistic 8k.",
+  "scene": "[Ação + ambiente + luz + câmera]. IMPORTANTE: Incluir período histórico específico (ex: ancient Egypt 1400 BC, first century Judea, Iron Age Israel) com detalhes de época (vestuário, arquitetura, paisagem típica). Live-action documentary style, cinematic lighting, high fidelity cinematography, historically accurate for [período], real people, ultra-detailed, hyper realistic 8k.",
   "character_anchors": ["Nome1", "Nome2"]
 }
 
-REGRAS:
-- Scene: 80-120 palavras
-- Terminar com texto padrão acima
-- character_anchors: nomes EXATOS dos personagens ou [] se vazio
+REGRAS CRÍTICAS:
+- Identificar época histórica dos blocos (ex: Êxodo = Egito 1400 AC, Jesus = Judeia século I)
+- Scene: 80-120 palavras incluindo período histórico específico
+- Descrever vestuário, arquitetura e ambiente da época correta
+- Terminar com "historically accurate for [período específico]"
+- character_anchors: nomes EXATOS ou []
 - Retornar APENAS array JSON
 
 BLOCOS:
 ${blocosNumerados}
 
-Retorne APENAS array JSON com ${blocos.length} takes.`;
+Retorne array JSON com ${blocos.length} takes com historicidade precisa.`;
 
     const response = await anthropic.messages.create({
       model: modeloUsar,
