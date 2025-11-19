@@ -99,11 +99,18 @@ module.exports = async (req, res) => {
     };
     const palavraTopico = formatoTopico[selectedLanguage];
 
-    // OPTIMIZED PROMPT - Reduced from ~300 tokens to ~80 tokens (ALL IN ENGLISH)
-    let estruturaPrompt = customPrompts.estrutura || `Create ${input.numTopics} topics about "${input.title}".
+    // IMPROVED PROMPT - Clear narrative guidelines
+    let estruturaPrompt = customPrompts.estrutura || `Create ${input.numTopics} topics about "${input.title}" for a YouTube biblical history channel.
 
 Synopsis: ${input.synopsis}
 ${input.knowledgeBase ? `\\nContext: ${input.knowledgeBase}` : ''}
+
+NARRATIVE GUIDELINES:
+- Structure as a book narrative in chronological order
+- No information should be repeated across topics
+- Topics must NOT contain introduction or conclusion (only development)
+- Each topic should be well-divided so viewers don't feel lost
+- Distribute content equally across all topics
 
 MANDATORY FORMAT:
 ${palavraTopico} 1: [title]
@@ -115,7 +122,7 @@ ${palavraTopico} 2: [title]
 2.1-2.${input.numSubtopics} [subtopics]
 
 Output language: ${outputLanguage}
-IMPORTANT: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY titles (do not develop).`;
+CRITICAL: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY titles (do not develop content yet).`;
 
     // Replace variables in custom prompt
     if (customPrompts.estrutura) {
@@ -241,21 +248,30 @@ Output language: ${outputLanguage}`;
           ? `\\nAlready covered: ${resumosTopicos.join('; ')}`
           : '';
 
-        topicoPrompt = `Develop this topic:
+        topicoPrompt = `You are writing Topic ${topicoNum} of ${input.numTopics} for a biblical YouTube video.
 
+TOPIC TO DEVELOP:
 ${topicoEstrutura}
 
 ${contextoAnterior}
 
-⚠️ MANDATORY:
-- EXACTLY ${charsTotal} characters (±3% margin)
-- Style: ${config.estilo}
-- Output language: ${outputLanguage}
-- Fluid, no subtopic titles
-- Bible verses integrated naturally
-- DO NOT repeat previous information
+NARRATIVE REQUIREMENTS:
+- Write as a book narrative in chronological order
+- Develop ALL subtopics listed above (cover each one completely)
+- NO introduction or conclusion in this topic (only development)
+- Flow naturally from one subtopic to the next WITHOUT subtopic titles
+- Bible verses must be integrated naturally into the narrative
+- DO NOT repeat any information already covered in previous topics
 
-CRITICAL: Count characters! Target = ${charsTotal} chars.`;
+CHARACTER COUNT REQUIREMENT:
+- Write EXACTLY ${charsTotal} characters (±3% margin = ${Math.floor(charsTotal * 0.97)}-${Math.ceil(charsTotal * 1.03)} chars)
+- This is CRITICAL - count carefully!
+
+STYLE:
+- ${config.estilo}
+- Output language: ${outputLanguage}
+
+START WRITING NOW (${charsTotal} characters):`;
       }
 
       const topicoMsg = await anthropic.messages.create({
