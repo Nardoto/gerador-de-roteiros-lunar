@@ -379,7 +379,7 @@ Output language: ${outputLanguage}`;
     // Aguardar um pouco antes de encerrar a conexão para garantir que o evento foi enviado
     setTimeout(() => {
       res.end();
-    }, 100);
+    }, 500);
 
   } catch (error) {
     console.error('❌ Error:', error);
