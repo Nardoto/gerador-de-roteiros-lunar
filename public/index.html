@@ -472,10 +472,15 @@
                 <div class="downloads" id="downloads">
                     <h2>Downloads</h2>
 
-                    <!-- Botão Principal -->
-                    <button id="downloadTudo" class="download-btn" style="background: #000000; color: white; font-size: 14px; font-weight: 500; padding: 15px; margin-bottom: 10px;">
-                        BAIXAR TODOS OS DOCUMENTOS
-                    </button>
+                    <!-- Botões Principais -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <button id="downloadTudo" class="download-btn" style="background: #000000; color: white; font-size: 14px; font-weight: 500; padding: 15px;">
+                            BAIXAR TODOS OS DOCUMENTOS
+                        </button>
+                        <button id="btnHistorico" class="download-btn" style="background: #4CAF50; color: white; font-size: 14px; font-weight: 500; padding: 15px;">
+                            📚 HISTÓRICO
+                        </button>
+                    </div>
 
                     <!-- Botão JSON -->
                     <button id="downloadJSON" class="download-btn" style="background: #000000; color: white; font-size: 14px; font-weight: 500; padding: 12px; margin-bottom: 15px;">
@@ -487,6 +492,20 @@
                     <button class="download-btn" id="downloadTakes">Baixar Takes</button>
                     <button class="download-btn" id="downloadPersonagens">Baixar Personagens</button>
                     <button class="download-btn" id="downloadSRT">Baixar SRT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Histórico -->
+        <div id="modalHistorico" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; overflow-y: auto;">
+            <div style="background: white; max-width: 900px; margin: 50px auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; color: #000;">📚 Histórico de Roteiros</h2>
+                    <button id="btnFecharHistorico" style="background: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px;">✖ Fechar</button>
+                </div>
+                <p style="color: #666; margin-bottom: 20px;">Roteiros salvos automaticamente (últimos 10)</p>
+                <div id="listaHistorico" style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Itens do histórico serão inseridos aqui -->
                 </div>
             </div>
         </div>
@@ -633,6 +652,196 @@
     </div>
 
     <script>
+        // ====== SISTEMA DE HISTÓRICO - VERSÃO 4.7 ======
+        const MAX_HISTORY_ITEMS = 10;
+        const HISTORY_KEY = 'scriptGeneratorHistory';
+
+        // Salvar roteiro no histórico
+        function saveToHistory() {
+            try {
+                const titulo = document.getElementById('title').value || 'Sem título';
+                const agora = new Date();
+
+                const roteiro = {
+                    id: Date.now(),
+                    titulo: titulo,
+                    data: agora.toISOString(),
+                    dataFormatada: agora.toLocaleString('pt-BR'),
+                    files: { ...currentFiles },
+                    docs: { ...currentDocs }
+                };
+
+                // Carregar histórico existente
+                let historico = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+
+                // Adicionar novo item no início
+                historico.unshift(roteiro);
+
+                // Limitar a 10 itens
+                if (historico.length > MAX_HISTORY_ITEMS) {
+                    historico = historico.slice(0, MAX_HISTORY_ITEMS);
+                }
+
+                // Salvar de volta
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(historico));
+
+                console.log('✅ Roteiro salvo no histórico:', titulo);
+            } catch (error) {
+                console.error('❌ Erro ao salvar histórico:', error);
+            }
+        }
+
+        // Carregar histórico
+        function loadHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            } catch (error) {
+                console.error('❌ Erro ao carregar histórico:', error);
+                return [];
+            }
+        }
+
+        // Renderizar histórico no modal
+        function renderHistory() {
+            const lista = document.getElementById('listaHistorico');
+            const historico = loadHistory();
+
+            if (historico.length === 0) {
+                lista.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">Nenhum roteiro salvo ainda. Gere um roteiro para começar!</p>';
+                return;
+            }
+
+            lista.innerHTML = historico.map(item => `
+                <div style="background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                        <div>
+                            <h3 style="margin: 0 0 8px 0; color: #000; font-size: 18px;">${item.titulo}</h3>
+                            <p style="margin: 0; color: #666; font-size: 14px;">📅 ${item.dataFormatada}</p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="restoreFromHistory(${item.id})" style="background: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                📂 Carregar
+                            </button>
+                            <button onclick="downloadFromHistory(${item.id})" style="background: #2196F3; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                💾 Baixar Tudo
+                            </button>
+                            <button onclick="deleteFromHistory(${item.id})" style="background: #f44336; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                🗑️ Apagar
+                            </button>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px; color: #666;">
+                        <div>✅ Roteiro: ${item.files?.hook ? 'Sim' : 'Não'}</div>
+                        <div>🎬 Takes: ${item.docs?.takes ? 'Sim' : 'Não'}</div>
+                        <div>👥 Personagens: ${item.docs?.personagens ? 'Sim' : 'Não'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Restaurar roteiro do histórico
+        function restoreFromHistory(id) {
+            try {
+                const historico = loadHistory();
+                const item = historico.find(r => r.id === id);
+
+                if (!item) {
+                    alert('❌ Roteiro não encontrado!');
+                    return;
+                }
+
+                // Restaurar arquivos
+                currentFiles = { ...item.files };
+                currentDocs = { ...item.docs };
+
+                // Atualizar interface
+                document.getElementById('title').value = item.titulo;
+
+                // Mostrar downloads
+                document.getElementById('downloads').style.display = 'block';
+                document.getElementById('tools').style.display = 'block';
+
+                // Atualizar contadores
+                updateCharCounters();
+
+                // Fechar modal
+                document.getElementById('modalHistorico').style.display = 'none';
+
+                addMessage('Sistema', `✅ Roteiro "${item.titulo}" carregado do histórico!`, 'system');
+                console.log('✅ Roteiro restaurado:', item.titulo);
+            } catch (error) {
+                console.error('❌ Erro ao restaurar roteiro:', error);
+                alert('❌ Erro ao carregar roteiro!');
+            }
+        }
+
+        // Baixar tudo de um roteiro do histórico
+        function downloadFromHistory(id) {
+            try {
+                const historico = loadHistory();
+                const item = historico.find(r => r.id === id);
+
+                if (!item) {
+                    alert('❌ Roteiro não encontrado!');
+                    return;
+                }
+
+                // Temporariamente carregar os arquivos
+                const tempFiles = { ...currentFiles };
+                const tempDocs = { ...currentDocs };
+
+                currentFiles = { ...item.files };
+                currentDocs = { ...item.docs };
+
+                // Baixar tudo (usar função existente)
+                document.getElementById('downloadTudo').click();
+
+                // Restaurar arquivos anteriores
+                currentFiles = tempFiles;
+                currentDocs = tempDocs;
+
+                console.log('✅ Download iniciado:', item.titulo);
+            } catch (error) {
+                console.error('❌ Erro ao baixar roteiro:', error);
+                alert('❌ Erro ao baixar arquivos!');
+            }
+        }
+
+        // Deletar roteiro do histórico
+        function deleteFromHistory(id) {
+            if (!confirm('🗑️ Tem certeza que deseja apagar este roteiro do histórico?')) {
+                return;
+            }
+
+            try {
+                let historico = loadHistory();
+                historico = historico.filter(r => r.id !== id);
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(historico));
+                renderHistory();
+                console.log('✅ Roteiro apagado do histórico');
+            } catch (error) {
+                console.error('❌ Erro ao deletar roteiro:', error);
+                alert('❌ Erro ao apagar roteiro!');
+            }
+        }
+
+        // Event listeners para o modal
+        document.getElementById('btnHistorico').addEventListener('click', () => {
+            renderHistory();
+            document.getElementById('modalHistorico').style.display = 'block';
+        });
+
+        document.getElementById('btnFecharHistorico').addEventListener('click', () => {
+            document.getElementById('modalHistorico').style.display = 'none';
+        });
+
+        // Fechar modal clicando fora
+        document.getElementById('modalHistorico').addEventListener('click', (e) => {
+            if (e.target.id === 'modalHistorico') {
+                document.getElementById('modalHistorico').style.display = 'none';
+            }
+        });
+
         // ====== SISTEMA ANTI-CACHE - VERSÃO 2.5 ======
         // FORÇAR NAVEGADOR A NÃO USAR CACHE
         if ('caches' in window) {
@@ -645,7 +854,7 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Script Generator v4.6');
+            console.log('Script Generator v4.7');
         });
 
         // Verificar autenticação
@@ -1081,6 +1290,9 @@
 
                                                 // Atualizar contadores finais
                                                 updateCharCounters();
+
+                                                // Salvar no histórico
+                                                saveToHistory();
                                             }).catch(error => {
                                                 console.error('Erro ao gerar documentos:', error);
                                                 addMessage('Sistema', `❌ Erro ao gerar documentos: ${error.message}`, 'system');
@@ -1089,6 +1301,9 @@
                                         } else {
                                             stopTimer();
                                             addMessage('Sistema', '✅ Geração completa!', 'system');
+
+                                            // Salvar no histórico (modo manual)
+                                            saveToHistory();
                                         }
                                     } else if (data.type === 'error') {
                                         stopTimer();
