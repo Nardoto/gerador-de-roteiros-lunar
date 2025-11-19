@@ -483,12 +483,10 @@
                     </button>
 
                     <!-- Botões Individuais -->
-                    <button class="download-btn" id="downloadEstrutura">Baixar Estrutura</button>
-                    <button class="download-btn" id="downloadHook">Baixar Hook</button>
-                    <button class="download-btn" id="downloadTopico1">Baixar Tópico 1</button>
-                    <button class="download-btn" id="downloadTopico2">Baixar Tópico 2</button>
-                    <button class="download-btn" id="downloadTopico3">Baixar Tópico 3</button>
                     <button class="download-btn" id="downloadCompleto">Baixar Roteiro Completo</button>
+                    <button class="download-btn" id="downloadTakes">Baixar Takes</button>
+                    <button class="download-btn" id="downloadPersonagens">Baixar Personagens</button>
+                    <button class="download-btn" id="downloadSRT">Baixar SRT</button>
                 </div>
             </div>
         </div>
@@ -647,7 +645,7 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Script Generator v4.5.1');
+            console.log('Script Generator v4.6');
         });
 
         // Verificar autenticação
@@ -1112,32 +1110,36 @@
         });
 
         // Download buttons
-        document.getElementById('downloadEstrutura').addEventListener('click', () => {
-            downloadFile('01_Estrutura.txt', currentFiles.estrutura);
-        });
-
-        document.getElementById('downloadHook').addEventListener('click', () => {
-            downloadFile('02_Hook.txt', currentFiles.hook);
-        });
-
-        document.getElementById('downloadTopico1').addEventListener('click', () => {
-            downloadFile('03_Topico_1.txt', currentFiles.topicos[0]);
-        });
-
-        document.getElementById('downloadTopico2').addEventListener('click', () => {
-            downloadFile('04_Topico_2.txt', currentFiles.topicos[1]);
-        });
-
-        document.getElementById('downloadTopico3').addEventListener('click', () => {
-            downloadFile('05_Topico_3.txt', currentFiles.topicos[2]);
-        });
-
         document.getElementById('downloadCompleto').addEventListener('click', () => {
             const completo = [
                 currentFiles.hook,
                 ...currentFiles.topicos
             ].join('\n\n');
             downloadFile('00_Roteiro_Completo.txt', completo);
+        });
+
+        document.getElementById('downloadTakes').addEventListener('click', () => {
+            if (!currentDocs.takes) {
+                alert('❌ Gere os takes primeiro usando modo automático!');
+                return;
+            }
+            downloadFile('takes.txt', currentDocs.takes);
+        });
+
+        document.getElementById('downloadPersonagens').addEventListener('click', () => {
+            if (!currentDocs.personagens) {
+                alert('❌ Gere os personagens primeiro usando modo automático!');
+                return;
+            }
+            downloadFile('personagens.txt', currentDocs.personagens);
+        });
+
+        document.getElementById('downloadSRT').addEventListener('click', () => {
+            if (!currentDocs.srt) {
+                alert('❌ Gere o SRT primeiro usando modo automático!');
+                return;
+            }
+            downloadFile('roteiro.srt', currentDocs.srt);
         });
 
         // Botão Download Tudo
@@ -1922,7 +1924,7 @@
 
                         // Atualizar progresso: 85% a 100% distribuído entre os grupos
                         const progressoParcial = 85 + ((g + 1) / numGrupos) * 15;
-                        updateProgress(Math.round(progressoParcial), `🎬 Gerando takes ${inicio+1}-${fim}...`);
+                        updateProgress(Math.round(progressoParcial), `🎬 Takes: Grupo ${g+1}/${numGrupos}`);
                         addMessage('Sistema', `[🎬 5/5 - Grupo ${g+1}/${numGrupos}] Gerando takes ${inicio+1}-${fim} (${blocosGrupo.length} blocos)... (~20s)`, 'system');
 
                         const takesRes = await fetch('/api/gerar-takes', {
@@ -2046,36 +2048,6 @@
             };
 
             downloadFile('documentacao_completa.json', JSON.stringify(jsonData, null, 2));
-        });
-
-        document.getElementById('downloadEstrutura').addEventListener('click', () => {
-            if (currentFiles && currentFiles.estrutura) {
-                downloadFile('00_Estrutura.txt', currentFiles.estrutura);
-            }
-        });
-
-        document.getElementById('downloadHook').addEventListener('click', () => {
-            if (currentFiles && currentFiles.hook) {
-                downloadFile('01_Hook.txt', currentFiles.hook);
-            }
-        });
-
-        document.getElementById('downloadTopico1').addEventListener('click', () => {
-            if (currentFiles && currentFiles.topico1) {
-                downloadFile('02_Topico1.txt', currentFiles.topico1);
-            }
-        });
-
-        document.getElementById('downloadTopico2').addEventListener('click', () => {
-            if (currentFiles && currentFiles.topico2) {
-                downloadFile('03_Topico2.txt', currentFiles.topico2);
-            }
-        });
-
-        document.getElementById('downloadTopico3').addEventListener('click', () => {
-            if (currentFiles && currentFiles.topico3) {
-                downloadFile('04_Topico3.txt', currentFiles.topico3);
-            }
         });
 
         document.getElementById('downloadCompleto').addEventListener('click', () => {
