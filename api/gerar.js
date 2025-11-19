@@ -186,6 +186,7 @@ CRITICAL: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY 
 Topics: ${topicos.map((t, i) => `${i + 1}. ${t.split('\\n')[0]}`).join('; ')}
 
 Create immersive introduction of EXACTLY ${input.hookChars} characters.
+CRITICAL: NO emojis, NO special characters (text will be narrated by AI voice).
 Output language: ${outputLanguage}`;
 
     if (customPrompts.hook) {
@@ -265,6 +266,7 @@ WRITING GUIDELINES:
 7. NO REPETITION: Do NOT repeat information, verses, or events from previous topics. Each topic is unique.
 8. BOUNDARIES: Only cover what THIS topic requests. Don't go beyond—it interferes with next topics' narrative.
 9. ENDING: End directly without conclusions or reflections. Just stop when the topic is complete.
+10. FORMAT: NO emojis, NO special characters (text will be narrated by AI voice). Plain narrative text only.
 
 CHARACTER REQUIREMENT:
 Write EXACTLY ${charsTotal} characters (range: ${Math.floor(charsTotal * 0.97)}-${Math.ceil(charsTotal * 1.03)})
@@ -324,11 +326,12 @@ START WRITING (${charsTotal} chars):`;
     // OPTIMIZED PROMPT (ALL IN ENGLISH)
     let conclusaoPrompt = customPrompts.conclusao || `Title: "${input.title}"
 
-Create conclusion (max 400 characters):
-- Subscribe to channel
-- Share video
-- Comment where watching from
-- Friendly tone
+Create narrated conclusion (max 400 characters) for voice-over:
+- Invite to subscribe and activate notifications
+- Ask viewers to share and comment their location
+- Warm, conversational tone
+- CRITICAL: NO emojis, NO special characters (text will be narrated by AI voice)
+- Natural spoken language only
 
 Output language: ${outputLanguage}`;
 
