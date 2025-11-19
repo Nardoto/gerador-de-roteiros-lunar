@@ -8,7 +8,8 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(api/gerar.js.backup)",
-      "Bash(copy /Y apigerar.js.backup apigerar.js)"
+      "Bash(copy /Y apigerar.js.backup apigerar.js)",
+      "Bash(vercel inspect:*)"
     ],
     "deny": [],
     "ask": []
