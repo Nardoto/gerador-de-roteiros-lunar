@@ -321,7 +321,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
             <div>
                 <h1 style="margin: 0; font-weight: 300; letter-spacing: -1px;">Script Generator</h1>
-                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8</div>
+                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.1</div>
                 <div id="userName" style="font-size: 12px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;"></div>
             </div>
             <button id="logoutBtn" style="padding: 8px 20px; background: #000000; color: white; border: none; cursor: pointer; font-weight: 400; font-size: 14px;">
@@ -854,7 +854,7 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Script Generator v4.8');
+            console.log('Script Generator v4.8.1');
         });
 
         // Verificar autenticação
@@ -971,6 +971,7 @@
         }
 
         let currentFiles = {};
+        let currentDocs = {}; // Armazena documentos gerados (trilha, personagens, takes, srt, blocos)
         let currentBlocks = [];
         let currentPersonagens = null; // Objeto com personagens gerados
         let startTime = null;
@@ -1216,12 +1217,15 @@
                                         if (data.step === 'estrutura') {
                                             label = '📋 Estrutura';
                                             currentFiles.estrutura = data.content;
+                                            currentDocs.estrutura = data.content;
                                         } else if (data.step === 'hook') {
                                             label = '🎣 Hook';
                                             currentFiles.hook = data.content;
+                                            currentDocs.hook = data.content;
                                         } else if (data.step === 'conclusao') {
                                             label = '🎬 Conclusão';
                                             currentFiles.conclusao = data.content;
+                                            currentDocs.conclusao = data.content;
                                         } else if (data.step && data.step.includes('subtopico')) {
                                             const match = data.step.match(/topico(\d+)_subtopico(\d+)/);
                                             if (match) {
@@ -1234,6 +1238,7 @@
                                             if (topicoNum) {
                                                 label = `📖 Tópico ${topicoNum}`;
                                                 currentFiles[`topico${topicoNum}`] = data.content;
+                                                currentDocs[`topico${topicoNum}`] = data.content;
                                             } else {
                                                 label = `📖 ${data.step.replace('topico', 'Tópico ')}`;
                                             }
@@ -2052,6 +2057,8 @@
 
                 // Download blocos.txt
                 const blocosTexto = currentBlocks.map((bloco, i) => `BLOCO ${i + 1}\n${bloco}`).join('\n\n');
+                currentFiles.blocos = blocosTexto;
+                currentDocs.blocos = blocosTexto;
                 downloadFile(`${tituloArquivo}_blocos.txt`, blocosTexto);
 
                 await new Promise(resolve => setTimeout(resolve, 500));
@@ -2068,6 +2075,7 @@
                 const trilhaData = await trilhaRes.json();
                 if (trilhaData.error) throw new Error(trilhaData.error);
                 currentFiles.trilha = trilhaData.trilha;
+                currentDocs.trilha = trilhaData.trilha;
 
                 // Mostrar conteúdo gerado
                 addMessage('🎵 Trilha Sonora', trilhaData.trilha, 'assistant', {
@@ -2091,6 +2099,7 @@
                 const persData = await persRes.json();
                 if (persData.error) throw new Error(persData.error);
                 currentFiles.personagens = persData.personagensTexto;
+                currentDocs.personagens = persData.personagensTexto;
                 currentPersonagens = persData.personagensObj;
 
                 // Mostrar conteúdo gerado
@@ -2125,6 +2134,8 @@
                     srtContent += `${index + 1}\n${formatSrtTimestamp(startTime)} --> ${formatSrtTimestamp(endTime)}\n${text}\n\n`;
                     currentTime = endTime + pauseTime;
                 });
+                currentFiles.srt = srtContent.trim();
+                currentDocs.srt = srtContent.trim();
                 downloadFile(`${tituloArquivo}.srt`, srtContent.trim());
                 addMessage('Sistema', `✅ SRT gerado com ${currentBlocks.length} blocos!`, 'system');
 
@@ -2203,6 +2214,7 @@
 
                 const takesCompleto = todosTakes.join('\n\n');
                 currentFiles.takes = takesCompleto;
+                currentDocs.takes = takesCompleto;
                 downloadFile(`${tituloArquivo}_takes.txt`, takesCompleto);
                 addMessage('Sistema', `✅ TAKES COMPLETOS: ${currentBlocks.length} takes gerados em ${numGrupos} grupo(s)!`, 'system');
                 addMessage('Sistema', `📥 Arquivo "${tituloArquivo}_takes.txt" baixado automaticamente!`, 'system');
