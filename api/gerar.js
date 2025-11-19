@@ -143,7 +143,7 @@ CRITICAL: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY 
 
     const estruturaMsg = await anthropic.messages.create({
       model: claudeModel,
-      max_tokens: calcMaxTokens(800),
+      max_tokens: calcMaxTokens(2000), // Increased for 3 topics with 8 subtopics each
       messages: [{ role: 'user', content: estruturaPrompt }]
     });
 
