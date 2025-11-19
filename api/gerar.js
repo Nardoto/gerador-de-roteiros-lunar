@@ -366,6 +366,7 @@ Output language: ${outputLanguage}`;
     console.log('\\n✅ Generation complete! (OPTIMIZED - 60-70% fewer tokens)');
 
     // Enviar evento de conclusão
+    console.log('📤 Enviando evento COMPLETE...');
     sendEvent({
       type: 'complete',
       files: {
@@ -375,9 +376,14 @@ Output language: ${outputLanguage}`;
         conclusao
       }
     });
+    console.log('✅ Evento COMPLETE enviado!');
+
+    // Flush explícito (forçar envio dos dados do buffer)
+    if (res.flush) res.flush();
 
     // Aguardar um pouco antes de encerrar a conexão para garantir que o evento foi enviado
     setTimeout(() => {
+      console.log('🔒 Encerrando conexão SSE');
       res.end();
     }, 500);
 
