@@ -112,7 +112,7 @@ NARRATIVE GUIDELINES:
 - Each topic should be well-divided so viewers don't feel lost
 - Distribute content equally across all topics
 
-MANDATORY FORMAT:
+MANDATORY FORMAT (FOLLOW EXACTLY):
 ${palavraTopico} 1: [title]
 1.1 [subtopic]
 1.2 [subtopic]
@@ -120,6 +120,12 @@ ${palavraTopico} 1: [title]
 
 ${palavraTopico} 2: [title]
 2.1-2.${input.numSubtopics} [subtopics]
+
+FORMAT RULES:
+- Use EXACTLY "${palavraTopico} X:" (number + colon, no extra characters)
+- NO markdown (**, ##, bullets)
+- NO special formatting
+- Plain text only
 
 Output language: ${outputLanguage}
 CRITICAL: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY titles (do not develop content yet).`;
@@ -157,8 +163,8 @@ CRITICAL: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY 
       wordCount: estrutura.split(/\\s+/).filter(w => w.length > 0).length
     });
 
-    // Extract topics from structure (multilingual)
-    const topicPattern = /(?:TÓPICO|TOPIC) \d+:/gi;
+    // Extract topics from structure (multilingual, flexible for markdown)
+    const topicPattern = /(?:\*\*)?(?:#{1,3}\s*)?(?:TÓPICO|TOPIC)\s*\d+\s*[:.\-]?(?:\*\*)?/gi;
     const marcadores = estrutura.match(topicPattern);
     const parts = estrutura.split(topicPattern);
 
