@@ -248,30 +248,30 @@ Output language: ${outputLanguage}`;
           ? `\\nAlready covered: ${resumosTopicos.join('; ')}`
           : '';
 
-        topicoPrompt = `You are writing Topic ${topicoNum} of ${input.numTopics} for a biblical YouTube video.
+        topicoPrompt = `You are an experienced biblical writer creating Topic ${topicoNum} of ${input.numTopics}.
 
 TOPIC TO DEVELOP:
 ${topicoEstrutura}
 
 ${contextoAnterior}
 
-NARRATIVE REQUIREMENTS:
-- Write as a book narrative in chronological order
-- Develop ALL subtopics listed above (cover each one completely)
-- NO introduction or conclusion in this topic (only development)
-- Flow naturally from one subtopic to the next WITHOUT subtopic titles
-- Bible verses must be integrated naturally into the narrative
-- DO NOT repeat any information already covered in previous topics
+WRITING GUIDELINES:
+1. BIBLICAL ACCURACY: Stay faithful to the biblical text. Do NOT add information the Bible doesn't mention.
+2. NARRATIVE STYLE: Third-person book narrative, chronological order. Cover ALL subtopics above completely.
+3. SIMPLICITY: Write so even a child can understand. Use simple, direct language. No difficult words or unnecessary complexity.
+4. BIBLE VERSES: Always mention chapter/verse naturally BEFORE quoting. Example: "As recorded in John 3:16, Jesus said..." No abrupt breaks.
+5. FLOW: Transition smoothly between subtopics WITHOUT subtopic titles. Keep text fluid and engaging, never tiring.
+6. CONVERSATIONAL: Write as if talking directly to ONE person. Be dynamic and create connection with the viewer.
+7. NO REPETITION: Do NOT repeat information, verses, or events from previous topics. Each topic is unique.
+8. BOUNDARIES: Only cover what THIS topic requests. Don't go beyond—it interferes with next topics' narrative.
+9. ENDING: End directly without conclusions or reflections. Just stop when the topic is complete.
 
-CHARACTER COUNT REQUIREMENT:
-- Write EXACTLY ${charsTotal} characters (±3% margin = ${Math.floor(charsTotal * 0.97)}-${Math.ceil(charsTotal * 1.03)} chars)
-- This is CRITICAL - count carefully!
+CHARACTER REQUIREMENT:
+Write EXACTLY ${charsTotal} characters (range: ${Math.floor(charsTotal * 0.97)}-${Math.ceil(charsTotal * 1.03)})
 
-STYLE:
-- ${config.estilo}
-- Output language: ${outputLanguage}
+Output language: ${outputLanguage}
 
-START WRITING NOW (${charsTotal} characters):`;
+START WRITING (${charsTotal} chars):`;
       }
 
       const topicoMsg = await anthropic.messages.create({
