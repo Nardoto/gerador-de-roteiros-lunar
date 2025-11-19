@@ -345,6 +345,8 @@ Output language: ${outputLanguage}`;
     // Complete
     // ============================================================
     console.log('\\n✅ Generation complete! (OPTIMIZED - 60-70% fewer tokens)');
+
+    // Enviar evento de conclusão
     sendEvent({
       type: 'complete',
       files: {
@@ -355,7 +357,10 @@ Output language: ${outputLanguage}`;
       }
     });
 
-    res.end();
+    // Aguardar um pouco antes de encerrar a conexão para garantir que o evento foi enviado
+    setTimeout(() => {
+      res.end();
+    }, 100);
 
   } catch (error) {
     console.error('❌ Error:', error);
