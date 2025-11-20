@@ -103,7 +103,7 @@ module.exports = async (req, res) => {
     let estruturaPrompt = customPrompts.estrutura || `Create ${input.numTopics} topics about "${input.title}" for a YouTube biblical history channel.
 
 Synopsis: ${input.synopsis}
-${input.knowledgeBase ? `\\nContext: ${input.knowledgeBase}` : ''}
+${input.knowledgeBase ? `\nContext: ${input.knowledgeBase}` : ''}
 
 NARRATIVE GUIDELINES:
 - Structure as a book narrative in chronological order
@@ -189,7 +189,7 @@ CRITICAL: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY 
 
     // OPTIMIZED PROMPT (ALL IN ENGLISH)
     let hookPrompt = customPrompts.hook || `Title: "${input.title}"
-Topics: ${topicos.map((t, i) => `${i + 1}. ${t.split('\\n')[0]}`).join('; ')}
+Topics: ${topicos.map((t, i) => `${i + 1}. ${t.split('\n')[0]}`).join('; ')}
 
 Create immersive introduction of EXACTLY ${input.hookChars} characters.
 CRITICAL: NO emojis, NO special characters, NO markdown formatting (**, ##, bullets).
@@ -253,7 +253,7 @@ Output language: ${outputLanguage}`;
           .replace(/\{languagePrompt\}/g, outputLanguage);
       } else {
         const contextoAnterior = resumosTopicos.length > 0
-          ? `\\nAlready covered: ${resumosTopicos.join('; ')}`
+          ? `\nAlready covered: ${resumosTopicos.join('; ')}`
           : '';
 
         topicoPrompt = `You are an experienced biblical writer creating Topic ${topicoNum} of ${input.numTopics}.
@@ -292,8 +292,8 @@ START WRITING (${charsTotal} chars):`;
       const topicoTexto = topicoMsg.content[0].text;
 
       // Add title to topic (plain text, no markdown)
-      const tituloTopico = topicoEstrutura.split('\\n')[0];
-      const topicoCompleto = `${tituloTopico}\\n\\n${topicoTexto}`;
+      const tituloTopico = topicoEstrutura.split('\n')[0];
+      const topicoCompleto = `${tituloTopico}\n\n${topicoTexto}`;
       topicosGerados.push(topicoCompleto);
 
       // Save summary for next topics context
