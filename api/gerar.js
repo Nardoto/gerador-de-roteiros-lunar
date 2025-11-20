@@ -291,12 +291,11 @@ START WRITING (${charsTotal} chars):`;
 
       const topicoTexto = topicoMsg.content[0].text;
 
-      // Add title to topic (plain text, no markdown)
-      const tituloTopico = topicoEstrutura.split('\n')[0];
-      const topicoCompleto = `${tituloTopico}\n\n${topicoTexto}`;
-      topicosGerados.push(topicoCompleto);
+      // Push only the pure topic text (no title or structure)
+      topicosGerados.push(topicoTexto);
 
-      // Save summary for next topics context
+      // Extract title for summary context
+      const tituloTopico = topicoEstrutura.split('\n')[0];
       const resumo = `Topic ${topicoNum}: ${tituloTopico.substring(0, 50)} (${topicoTexto.length} chars)`;
       resumosTopicos.push(resumo);
 
@@ -307,12 +306,12 @@ START WRITING (${charsTotal} chars):`;
       sendEvent({
         type: 'message',
         role: 'assistant',
-        content: topicoCompleto,
+        content: topicoTexto,
         step: `topico${topicoNum}`,
         prompt: topicoPrompt,
-        charCount: topicoCompleto.length,
-        charCountNoSpaces: topicoCompleto.replace(/\\s/g, '').length,
-        wordCount: topicoCompleto.split(/\\s+/).filter(w => w.length > 0).length
+        charCount: topicoTexto.length,
+        charCountNoSpaces: topicoTexto.replace(/\s/g, '').length,
+        wordCount: topicoTexto.split(/\s+/).filter(w => w.length > 0).length
       });
 
       sendEvent({
