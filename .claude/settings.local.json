@@ -15,7 +15,8 @@
       "Bash(git push:*)",
       "Bash(git tag:*)",
       "Bash(vercel --prod:*)",
-      "Bash(vercel alias:*)"
+      "Bash(vercel alias:*)",
+      "Bash(vercel --version:*)"
     ],
     "deny": [],
     "ask": []

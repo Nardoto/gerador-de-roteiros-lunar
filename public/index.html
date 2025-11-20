@@ -321,7 +321,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
             <div>
                 <h1 style="margin: 0; font-weight: 300; letter-spacing: -1px;">Script Generator</h1>
-                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.7</div>
+                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.8</div>
                 <div id="userName" style="font-size: 12px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;"></div>
             </div>
             <button id="logoutBtn" style="padding: 8px 20px; background: #000000; color: white; border: none; cursor: pointer; font-weight: 400; font-size: 14px;">
@@ -856,7 +856,7 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Script Generator v4.8.7');
+            console.log('Script Generator v4.8.8');
         });
 
         // Verificar autenticação
@@ -1333,6 +1333,21 @@
                                             // Usar arquivos já salvos durante geração
                                             console.log('📦 Usando arquivos salvos durante geração');
                                             console.log('📦 Arquivos disponíveis:', Object.keys(currentFiles));
+
+                                            // Reconstruir array de tópicos a partir dos tópicos individuais
+                                            const topicosArray = [];
+                                            for (let i = 1; i <= data.summary.topicosCount; i++) {
+                                                const topicoKey = `topico${i}`;
+                                                if (currentFiles[topicoKey]) {
+                                                    topicosArray.push(currentFiles[topicoKey]);
+                                                    if (currentDocs[topicoKey]) {
+                                                        // Também adicionar ao currentDocs para consistência
+                                                    }
+                                                }
+                                            }
+                                            currentFiles.topicos = topicosArray;
+                                            currentDocs.topicos = topicosArray;
+                                            console.log(`✅ Array de tópicos reconstruído: ${topicosArray.length} tópicos`);
                                         } else if (data.files) {
                                             // Formato antigo com arquivos completos (não deveria mais acontecer)
                                             console.log('⚠️ Complete event com arquivos completos (formato antigo)');
