@@ -45,9 +45,43 @@ module.exports = async (req, res) => {
       'Connection': 'keep-alive'
     });
 
-    // Função para enviar eventos SSE
+    // Função para enviar eventos SSE com suporte a chunking para mensagens grandes
     const sendEvent = (data) => {
-      res.write(`data: ${JSON.stringify(data)}\\n\\n`);
+      try {
+        const jsonStr = JSON.stringify(data);
+
+        // Se a mensagem é muito grande (>7000 chars), dividir em chunks
+        if (data.type === 'message' && data.content && data.content.length > 7000) {
+          const content = data.content;
+          const chunkSize = 7000;
+          const chunks = [];
+
+          for (let i = 0; i < content.length; i += chunkSize) {
+            chunks.push(content.slice(i, i + chunkSize));
+          }
+
+          // Enviar cada chunk como uma mensagem separada
+          chunks.forEach((chunk, index) => {
+            const chunkData = {
+              ...data,
+              content: chunk,
+              isChunk: true,
+              chunkIndex: index,
+              totalChunks: chunks.length,
+              isLastChunk: index === chunks.length - 1
+            };
+            res.write(`data: ${JSON.stringify(chunkData)}\\n\\n`);
+          });
+        } else {
+          // Mensagem normal, enviar diretamente
+          res.write(`data: ${jsonStr}\\n\\n`);
+        }
+
+        // Flush para garantir envio imediato
+        if (res.flush) res.flush();
+      } catch (error) {
+        console.error('❌ Error sending event:', error);
+      }
     };
 
     console.log('\\n🚀 Starting OPTIMIZED generation (Option B - Minimal Context)...');

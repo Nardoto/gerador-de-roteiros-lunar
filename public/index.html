@@ -321,7 +321,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
             <div>
                 <h1 style="margin: 0; font-weight: 300; letter-spacing: -1px;">Script Generator</h1>
-                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.4</div>
+                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.5</div>
                 <div id="userName" style="font-size: 12px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;"></div>
             </div>
             <button id="logoutBtn" style="padding: 8px 20px; background: #000000; color: white; border: none; cursor: pointer; font-weight: 400; font-size: 14px;">
@@ -856,7 +856,7 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Script Generator v4.8.4');
+            console.log('Script Generator v4.8.5');
         });
 
         // Verificar autenticação
@@ -1165,6 +1165,7 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
+                const chunkBuffer = {}; // Buffer para armazenar chunks temporários
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -1204,7 +1205,55 @@
                             if (!jsonStr) continue;
 
                             const data = JSON.parse(jsonStr);
-                            console.log(`✅ Parseado: type=${data.type}, step=${data.step}`);
+                            console.log(`✅ Parseado: type=${data.type}, step=${data.step}, isChunk=${data.isChunk}`);
+
+                                    // Processar chunks de mensagens grandes
+                                    if (data.isChunk) {
+                                        const key = `${data.step}_${data.type}`;
+
+                                        // Inicializar buffer se primeira vez
+                                        if (!chunkBuffer[key]) {
+                                            chunkBuffer[key] = {
+                                                chunks: [],
+                                                metadata: { ...data }
+                                            };
+                                        }
+
+                                        // Adicionar chunk ao buffer
+                                        chunkBuffer[key].chunks[data.chunkIndex] = data.content;
+
+                                        console.log(`📦 Chunk ${data.chunkIndex + 1}/${data.totalChunks} recebido para ${key}`);
+
+                                        // Se é o último chunk, processar a mensagem completa
+                                        if (data.isLastChunk) {
+                                            // Juntar todos os chunks
+                                            const fullContent = chunkBuffer[key].chunks.join('');
+
+                                            // Criar objeto de dados completo
+                                            const fullData = {
+                                                ...chunkBuffer[key].metadata,
+                                                content: fullContent,
+                                                isChunk: false
+                                            };
+
+                                            console.log(`✅ Mensagem completa reconstruída: ${fullContent.length} chars`);
+
+                                            // Limpar buffer
+                                            delete chunkBuffer[key];
+
+                                            // Processar como mensagem normal
+                                            data.type = fullData.type;
+                                            data.step = fullData.step;
+                                            data.content = fullData.content;
+                                            data.prompt = fullData.prompt;
+                                            data.charCount = fullData.charCount;
+                                            data.charCountNoSpaces = fullData.charCountNoSpaces;
+                                            data.wordCount = fullData.wordCount;
+                                        } else {
+                                            // Ainda esperando mais chunks, não processar ainda
+                                            continue;
+                                        }
+                                    }
 
                                     if (data.type === 'step') {
                                         const progressText = data.progress || `🔄 ${data.step} - ${data.status}`;
