@@ -413,18 +413,30 @@ Output language: ${outputLanguage}`;
     // ============================================================
     console.log('\\n✅ Generation complete! (OPTIMIZED - 60-70% fewer tokens)');
 
-    // Enviar evento de conclusão
-    console.log('📤 Enviando evento COMPLETE...');
+    // Calcular tamanho total dos arquivos gerados
+    const totalSize = estrutura.length + hook.length +
+                     topicosGerados.reduce((acc, t) => acc + t.length, 0) +
+                     conclusao.length;
+
+    console.log(`📊 Total content size: ${totalSize} chars`);
+
+    // Enviar evento de conclusão LEVE (sem conteúdo completo)
+    // O frontend já tem todo o conteúdo dos eventos individuais
+    console.log('📤 Enviando evento COMPLETE (lightweight)...');
     sendEvent({
       type: 'complete',
-      files: {
-        estrutura,
-        hook,
-        topicos: topicosGerados,
-        conclusao
-      }
+      status: 'success',
+      summary: {
+        estruturaLength: estrutura.length,
+        hookLength: hook.length,
+        topicosCount: topicosGerados.length,
+        topicosLengths: topicosGerados.map(t => t.length),
+        conclusaoLength: conclusao.length,
+        totalSize: totalSize
+      },
+      message: 'Roteiro gerado com sucesso!'
     });
-    console.log('✅ Evento COMPLETE enviado!');
+    console.log('✅ Evento COMPLETE enviado (lightweight)!');
 
     // Flush explícito (forçar envio dos dados do buffer)
     if (res.flush) res.flush();
@@ -433,7 +445,7 @@ Output language: ${outputLanguage}`;
     setTimeout(() => {
       console.log('🔒 Encerrando conexão SSE');
       res.end();
-    }, 500);
+    }, 1000); // Aumentado para 1 segundo para garantir envio
 
   } catch (error) {
     console.error('❌ Error:', error);

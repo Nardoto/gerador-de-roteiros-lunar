@@ -321,7 +321,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
             <div>
                 <h1 style="margin: 0; font-weight: 300; letter-spacing: -1px;">Script Generator</h1>
-                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.6</div>
+                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.7</div>
                 <div id="userName" style="font-size: 12px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;"></div>
             </div>
             <button id="logoutBtn" style="padding: 8px 20px; background: #000000; color: white; border: none; cursor: pointer; font-weight: 400; font-size: 14px;">
@@ -376,14 +376,14 @@
                 </div>
 
                 <label>Caracteres Totais:</label>
-                <input type="number" id="totalChars" value="20000" step="1000">
+                <input type="number" id="totalChars" value="30000" step="1000">
 
                 <label>Modelo Claude (para roteiro):</label>
                 <select id="claudeModel">
-                    <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (Recomendado)</option>
-                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (Rápido)</option>
-                    <option value="claude-opus-4-1-20250805">Claude Opus 4.1 (Qualidade)</option>
-                    <option value="claude-haiku-4-5" selected>Claude Haiku 4.5 (Mais Rápido)</option>
+                    <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5</option>
+                    <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                    <option value="claude-opus-4-1-20250805" selected>Claude Opus 4.1 (Recomendado)</option>
+                    <option value="claude-haiku-4-5">Claude Haiku 4.5 (Mais Rápido)</option>
                 </select>
 
                 <!-- Configuração de Blocos -->
@@ -396,7 +396,7 @@
                         </div>
                         <div>
                             <label style="font-size: 0.85rem;">Reading Rate (c/s):</label>
-                            <input type="number" id="readingRateConfig" value="12" min="5" max="30" style="width: 100%; padding: 8px; border: 1px solid #d0d0d0; border-radius: 0;">
+                            <input type="number" id="readingRateConfig" value="10" min="5" max="30" style="width: 100%; padding: 8px; border: 1px solid #d0d0d0; border-radius: 0;">
                         </div>
                     </div>
                 </div>
@@ -410,22 +410,22 @@
                     <div id="configAutomatico" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #d0d0d0;">
                         <label style="color: #000000; display: block; margin-bottom: 5px; font-size: 13px;">Modelo para Documentos (Trilha + Personagens):</label>
                         <select id="modeloDocumentosInicio" style="padding: 8px; border-radius: 0; border: 1px solid #d0d0d0; font-size: 14px; width: 100%; margin-bottom: 10px;">
-                            <option value="claude-opus-4-1-20250805" selected>Claude Opus 4.1 (Qualidade Máxima)</option>
+                            <option value="claude-opus-4-1-20250805">Claude Opus 4.1 (Qualidade Máxima)</option>
                             <option value="claude-sonnet-4-20250514">Sonnet 4 (mais barato)</option>
-                            <option value="claude-sonnet-4-5-20250929">Sonnet 4.5</option>
+                            <option value="claude-sonnet-4-5-20250929" selected>Sonnet 4.5 (Recomendado)</option>
                             <option value="claude-haiku-4-5">Haiku 4.5 (muito rápido e barato)</option>
                         </select>
 
                         <label style="color: #000000; display: block; margin-bottom: 5px; font-size: 13px;">Modelo para Takes (Prompts de Imagem):</label>
                         <select id="modeloTakesInicio" style="padding: 8px; border-radius: 0; border: 1px solid #d0d0d0; font-size: 14px; width: 100%;">
-                            <option value="claude-opus-4-1-20250805" selected>Claude Opus 4.1 (Qualidade Máxima)</option>
+                            <option value="claude-opus-4-1-20250805">Claude Opus 4.1 (Qualidade Máxima)</option>
                             <option value="claude-sonnet-4-20250514">Sonnet 4 (mais barato)</option>
-                            <option value="claude-sonnet-4-5-20250929">Sonnet 4.5 (recomendado)</option>
+                            <option value="claude-sonnet-4-5-20250929" selected>Sonnet 4.5 (Recomendado)</option>
                             <option value="claude-haiku-4-5">Haiku 4.5 (muito rápido e barato)</option>
                         </select>
 
                         <div style="color: #666666; font-size: 12px; margin-top: 8px;">
-                            Tempo estimado: ~3-5 minutos | Custo: ~$1.50-$2.00 (Opus)
+                            Tempo estimado: ~2-3 minutos | Custo: ~$0.80-$1.20
                         </div>
                     </div>
                 </div>
@@ -628,7 +628,7 @@
                         </div>
                         <div>
                             <label>Reading Rate (c/s):</label>
-                            <input type="number" id="readingRate" value="12" min="5" max="30">
+                            <input type="number" id="readingRate" value="10" min="5" max="30">
                         </div>
                     </div>
 
@@ -856,7 +856,7 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Script Generator v4.8.6');
+            console.log('Script Generator v4.8.7');
         });
 
         // Verificar autenticação
@@ -1322,16 +1322,25 @@
                                         const progressoParcial = 20 + (data.topicoNum / numTopics) * 50;
                                         updateProgress(Math.round(progressoParcial), `Tópico ${data.topicoNum}/${numTopics} completo`);
                                     } else if (data.type === 'complete') {
-                                        // Se não houver data.files, usar os arquivos que já foram salvos durante a geração
-                                        if (!data.files) {
-                                            console.log('⚠️ data.files está vazio, usando arquivos salvos durante geração');
-                                            data.files = currentFiles;
-                                        } else {
-                                            // Mesclar com os arquivos já salvos
-                                            currentFiles = { ...currentFiles, ...data.files };
-                                        }
+                                        console.log('✅ Evento complete recebido:', data);
 
-                                        console.log('📦 Arquivos disponíveis:', Object.keys(currentFiles));
+                                        // Verificar se é o novo formato lightweight
+                                        if (data.status === 'success' && data.summary) {
+                                            console.log('📊 Complete event (lightweight):', data.summary);
+                                            console.log(`   Total size: ${data.summary.totalSize} chars`);
+                                            console.log(`   Topics: ${data.summary.topicosCount} (${data.summary.topicosLengths.join(', ')} chars)`);
+
+                                            // Usar arquivos já salvos durante geração
+                                            console.log('📦 Usando arquivos salvos durante geração');
+                                            console.log('📦 Arquivos disponíveis:', Object.keys(currentFiles));
+                                        } else if (data.files) {
+                                            // Formato antigo com arquivos completos (não deveria mais acontecer)
+                                            console.log('⚠️ Complete event com arquivos completos (formato antigo)');
+                                            currentFiles = { ...currentFiles, ...data.files };
+                                        } else {
+                                            // Fallback para formato desconhecido
+                                            console.log('⚠️ Complete event sem files nem summary, usando arquivos salvos');
+                                        }
 
                                         // Atualizar contadores
                                         updateCharCounters();
@@ -1353,6 +1362,7 @@
 
                                         if (modoAutoAtivado) {
                                             addMessage('Sistema', '✅ Roteiro completo! Iniciando geração automática de documentos...', 'system');
+                                            console.log('🚀 Chamando gerarDocumentosAutomaticamente()...');
 
                                             // Gerar documentos automaticamente (sem await pois não estamos em função async)
                                             gerarDocumentosAutomaticamente().then(() => {
