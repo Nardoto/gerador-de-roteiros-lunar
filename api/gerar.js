@@ -50,10 +50,11 @@ module.exports = async (req, res) => {
       try {
         const jsonStr = JSON.stringify(data);
 
-        // Se a mensagem é muito grande (>7000 chars), dividir em chunks
-        if (data.type === 'message' && data.content && data.content.length > 7000) {
+        // Se a mensagem é muito grande (>5000 chars), dividir em chunks
+        // Reduzido de 7000 para 5000 para ter margem de segurança com metadados JSON
+        if (data.type === 'message' && data.content && data.content.length > 5000) {
           const content = data.content;
-          const chunkSize = 7000;
+          const chunkSize = 5000;
           const chunks = [];
 
           for (let i = 0; i < content.length; i += chunkSize) {
@@ -336,6 +337,12 @@ START WRITING (${charsTotal} chars):`;
       const accuracy = Math.round(topicoTexto.length / charsTotal * 100);
       const diff = topicoTexto.length - charsTotal;
       console.log(`✅ Topic ${topicoNum}: ${topicoTexto.length}/${charsTotal} chars (${accuracy}%, ${diff > 0 ? '+' : ''}${diff})`);
+
+      // Log para debug de tamanho
+      console.log(`📏 Topic ${topicoNum} content length: ${topicoTexto.length} chars`);
+      if (topicoTexto.length > 5000) {
+        console.log(`📦 Topic ${topicoNum} will be chunked (${topicoTexto.length} > 5000)`);
+      }
 
       sendEvent({
         type: 'message',
