@@ -9,7 +9,13 @@
       "Bash(findstr:*)",
       "Bash(api/gerar.js.backup)",
       "Bash(copy /Y apigerar.js.backup apigerar.js)",
-      "Bash(vercel inspect:*)"
+      "Bash(vercel inspect:*)",
+      "Bash(git add:*)",
+      "Bash(cd:*)",
+      "Bash(git push:*)",
+      "Bash(git tag:*)",
+      "Bash(vercel --prod:*)",
+      "Bash(vercel alias:*)"
     ],
     "deny": [],
     "ask": []
