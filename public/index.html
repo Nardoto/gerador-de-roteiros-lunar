@@ -321,7 +321,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
             <div>
                 <h1 style="margin: 0; font-weight: 300; letter-spacing: -1px;">Script Generator</h1>
-                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.3</div>
+                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.4</div>
                 <div id="userName" style="font-size: 12px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;"></div>
             </div>
             <button id="logoutBtn" style="padding: 8px 20px; background: #000000; color: white; border: none; cursor: pointer; font-weight: 400; font-size: 14px;">
@@ -856,7 +856,7 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Script Generator v4.8.3');
+            console.log('Script Generator v4.8.4');
         });
 
         // Verificar autenticação
@@ -978,6 +978,7 @@
         let currentPersonagens = null; // Objeto com personagens gerados
         let startTime = null;
         let timerInterval = null;
+        let startTimeTotal = null; // Tempo total de geração (roteiro + documentos)
         let modoAutoAtivado = false; // Armazena se modo automático foi ativado ANTES de gerar
         const PAUSE_TIME = 0.9; // Pausa entre blocos em segundos
 
@@ -1123,6 +1124,7 @@
 
             // Iniciar cronômetro
             startTimer();
+            startTimeTotal = Date.now(); // Marca início da geração completa
 
             // Resetar progresso
             updateProgress(0, 'Iniciando...');
@@ -1289,11 +1291,16 @@
                                         downloads.style.display = 'block';
                                         tools.style.display = 'block';
 
-                                        // Atualizar progresso para 100%
-                                        updateProgress(100, '✅ Geração completa!');
-
                                         // Verificar se modo automático foi ativado
                                         console.log('🔍 Verificando modo automático:', modoAutoAtivado);
+
+                                        // Se não é modo automático, marcar como completo
+                                        if (!modoAutoAtivado) {
+                                            updateProgress(100, '✅ Geração completa!');
+                                        } else {
+                                            // Se é modo automático, deixar em 70% pois ainda vai gerar documentos
+                                            updateProgress(70, '📄 Preparando documentos...');
+                                        }
 
                                         if (modoAutoAtivado) {
                                             addMessage('Sistema', '✅ Roteiro completo! Iniciando geração automática de documentos...', 'system');
@@ -1301,6 +1308,14 @@
                                             // Gerar documentos automaticamente (sem await pois não estamos em função async)
                                             gerarDocumentosAutomaticamente().then(() => {
                                                 stopTimer();
+
+                                                // Calcular e mostrar tempo total
+                                                const tempoTotalMs = Date.now() - startTimeTotal;
+                                                const minutos = Math.floor(tempoTotalMs / 60000);
+                                                const segundos = Math.floor((tempoTotalMs % 60000) / 1000);
+                                                const tempoFormatado = `${minutos}:${segundos.toString().padStart(2, '0')}`;
+
+                                                addMessage('Sistema', `⏱️ TEMPO TOTAL DE GERAÇÃO: ${tempoFormatado}`, 'system');
                                                 addMessage('Sistema', '🎉 TUDO PRONTO! Roteiro + Documentos gerados!', 'system');
 
                                                 // Atualizar contadores finais
@@ -2223,10 +2238,18 @@
 
                 // Sucesso!
                 updateProgress(100, '✅ COMPLETO!');
+
+                // Calcular tempo total
+                const tempoTotalMs = Date.now() - startTimeTotal;
+                const minutos = Math.floor(tempoTotalMs / 60000);
+                const segundos = Math.floor((tempoTotalMs % 60000) / 1000);
+                const tempoFormatado = `${minutos}:${segundos.toString().padStart(2, '0')}`;
+
                 const custoTotal = (parseFloat(trilhaData.custoEstimado) +
                                    parseFloat(persData.custoEstimado) +
                                    (parseFloat(ultimoCustoTakes) * numGrupos)).toFixed(3);
                 addMessage('Sistema', `💰 Custo dos documentos: ~$${custoTotal}`, 'system');
+                addMessage('Sistema', `⏱️ TEMPO TOTAL DE GERAÇÃO: ${tempoFormatado}`, 'system');
                 addMessage('Sistema', `🎉 GERAÇÃO AUTOMÁTICA FINALIZADA COM SUCESSO!`, 'system');
                 addMessage('Sistema', `📦 Todos os 5 arquivos foram baixados: Trilha Sonora, Personagens, SRT, Blocos e Takes!`, 'system');
 
