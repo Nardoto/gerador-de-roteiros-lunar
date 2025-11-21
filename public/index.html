@@ -321,7 +321,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
             <div>
                 <h1 style="margin: 0; font-weight: 300; letter-spacing: -1px;">Script Generator</h1>
-                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.9</div>
+                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.9.0</div>
                 <div id="userName" style="font-size: 12px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;"></div>
             </div>
             <button id="logoutBtn" style="padding: 8px 20px; background: #000000; color: white; border: none; cursor: pointer; font-weight: 400; font-size: 14px;">
@@ -856,7 +856,7 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Script Generator v4.8.9');
+            console.log('Script Generator v4.9.0');
 
             // Carregar histórico logo ao abrir o site
             const historico = loadHistory();
@@ -1222,6 +1222,65 @@
                                     });
                                 }
                             });
+                        }
+
+                        // VERIFICAR SE TEMOS TUDO E INICIAR MODO AUTOMÁTICO
+                        console.log('🔍 Verificando se geração está completa...');
+                        console.log('📦 Arquivos:', Object.keys(currentFiles));
+
+                        const numTopics = parseInt(document.getElementById('numTopics').value);
+                        const temTodosTopicos = Array.from({length: numTopics}, (_, i) => i + 1)
+                            .every(n => currentFiles[`topico${n}`]);
+
+                        console.log(`   Estrutura: ${currentFiles.estrutura ? '✅' : '❌'}`);
+                        console.log(`   Hook: ${currentFiles.hook ? '✅' : '❌'}`);
+                        console.log(`   Tópicos: ${temTodosTopicos ? '✅ TODOS' : '❌ FALTANDO'}`);
+                        console.log(`   Conclusão: ${currentFiles.conclusao ? '✅' : '❌'}`);
+
+                        if (currentFiles.estrutura && currentFiles.hook && temTodosTopicos && currentFiles.conclusao) {
+                            console.log('✅ Roteiro COMPLETO!');
+
+                            // Reconstruir array de tópicos
+                            const topicosArray = [];
+                            for (let i = 1; i <= numTopics; i++) {
+                                if (currentFiles[`topico${i}`]) {
+                                    topicosArray.push(currentFiles[`topico${i}`]);
+                                }
+                            }
+                            currentFiles.topicos = topicosArray;
+                            currentDocs.topicos = topicosArray;
+                            console.log(`✅ Array: ${topicosArray.length} tópicos`);
+
+                            // Atualizar UI
+                            updateCharCounters();
+                            downloads.style.display = 'block';
+                            tools.style.display = 'block';
+
+                            // Verificar modo automático
+                            if (modoAutoAtivado) {
+                                console.log('🚀 MODO AUTOMÁTICO ATIVADO!');
+                                updateProgress(70, '📄 Preparando documentos...');
+                                addMessage('Sistema', '✅ Roteiro completo! Iniciando geração automática...', 'system');
+
+                                gerarDocumentosAutomaticamente().then(() => {
+                                    stopTimer();
+                                    const tempo = Date.now() - startTimeTotal;
+                                    const min = Math.floor(tempo / 60000);
+                                    const seg = Math.floor((tempo % 60000) / 1000);
+                                    addMessage('Sistema', `⏱️ TEMPO: ${min}:${seg.toString().padStart(2, '0')}`, 'system');
+                                    addMessage('Sistema', '🎉 TUDO PRONTO!', 'system');
+                                    updateProgress(100, '✅ Concluído!');
+                                }).catch(err => {
+                                    console.error('❌ Erro:', err);
+                                    addMessage('Erro', `❌ ${err.message}`, 'error');
+                                });
+                            } else {
+                                updateProgress(100, '✅ Completo!');
+                                stopTimer();
+                            }
+                        } else {
+                            console.log('⚠️ INCOMPLETO!');
+                            updateProgress(100, '⚠️ Incompleto');
                         }
 
                         break;
