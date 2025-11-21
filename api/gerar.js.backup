@@ -226,7 +226,7 @@ CRITICAL: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY 
     console.log(`🔍 Extracted ${topicos.length} topics`);
 
     if (topicos.length < input.numTopics) {
-      await sendEvent({ type: 'error', error: `Only ${topicos.length} topics generated. Expected ${input.numTopics}.` });
+      sendEvent({ type: 'error', error: `Only ${topicos.length} topics generated. Expected ${input.numTopics}.` });
       res.end();
       return;
     }
@@ -235,7 +235,7 @@ CRITICAL: ${input.numTopics} topics, ${input.numSubtopics} subtopics each. ONLY 
     // STEP 2: Hook
     // ============================================================
     console.log('\\n🎣 Generating hook...');
-    await sendEvent({ type: 'step', step: 'hook', status: 'started' });
+    sendEvent({ type: 'step', step: 'hook', status: 'started' });
 
     // OPTIMIZED PROMPT (ALL IN ENGLISH)
     let hookPrompt = customPrompts.hook || `Title: "${input.title}"
@@ -262,7 +262,7 @@ Output language: ${outputLanguage}`;
 
     console.log(`✅ Hook generated: ${hook.length}/${input.hookChars} chars (${Math.round(hook.length/input.hookChars*100)}%)`);
 
-    await sendEvent({
+    sendEvent({
       type: 'message',
       role: 'assistant',
       content: hook,
@@ -285,7 +285,7 @@ Output language: ${outputLanguage}`;
 
       console.log(`\\n📖 Generating COMPLETE TOPIC ${topicoNum}/${input.numTopics}...`);
 
-      await sendEvent({ type: 'step', step: `topico${topicoNum}`, status: 'started' });
+      sendEvent({ type: 'step', step: `topico${topicoNum}`, status: 'started' });
 
       const charsTotal = Math.floor(input.totalChars / input.numTopics);
 
@@ -359,7 +359,7 @@ START WRITING (${charsTotal} chars):`;
         console.log(`📦 Topic ${topicoNum} will be chunked (${topicoTexto.length} > 5000)`);
       }
 
-      await sendEvent({
+      sendEvent({
         type: 'message',
         role: 'assistant',
         content: topicoTexto,
@@ -370,7 +370,7 @@ START WRITING (${charsTotal} chars):`;
         wordCount: topicoTexto.split(/\s+/).filter(w => w.length > 0).length
       });
 
-      await sendEvent({
+      sendEvent({
         type: 'topico_complete',
         topicoNum: topicoNum,
         totalChars: topicoTexto.length,
@@ -383,7 +383,7 @@ START WRITING (${charsTotal} chars):`;
     // FINAL STEP: Conclusion with CTA
     // ============================================================
     console.log('\\n🎬 Generating conclusion/CTA...');
-    await sendEvent({ type: 'step', step: 'conclusao', status: 'started' });
+    sendEvent({ type: 'step', step: 'conclusao', status: 'started' });
 
     // OPTIMIZED PROMPT (ALL IN ENGLISH)
     let conclusaoPrompt = customPrompts.conclusao || `Title: "${input.title}"
@@ -412,7 +412,7 @@ Output language: ${outputLanguage}`;
 
     console.log(`✅ Conclusion generated: ${conclusao.length} chars`);
 
-    await sendEvent({
+    sendEvent({
       type: 'message',
       role: 'assistant',
       content: conclusao,
@@ -438,7 +438,7 @@ Output language: ${outputLanguage}`;
     // Enviar evento de conclusão LEVE (sem conteúdo completo)
     // O frontend já tem todo o conteúdo dos eventos individuais
     console.log('📤 Enviando evento COMPLETE (lightweight)...');
-    await sendEvent({
+    sendEvent({
       type: 'complete',
       status: 'success',
       summary: {
@@ -456,11 +456,11 @@ Output language: ${outputLanguage}`;
     // Flush explícito (forçar envio dos dados do buffer)
     if (res.flush) res.flush();
 
-    // Aguardar antes de encerrar a conexão para garantir que todos os chunks foram recebidos
+    // Aguardar um pouco antes de encerrar a conexão para garantir que o evento foi enviado
     setTimeout(() => {
       console.log('🔒 Encerrando conexão SSE');
       res.end();
-    }, 2500); // 2.5 segundos para garantir que todos os chunks foram processados pelo cliente
+    }, 1000); // Aumentado para 1 segundo para garantir envio
 
   } catch (error) {
     console.error('❌ Error:', error);

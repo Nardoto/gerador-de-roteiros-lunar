@@ -321,7 +321,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid #e0e0e0;">
             <div>
                 <h1 style="margin: 0; font-weight: 300; letter-spacing: -1px;">Script Generator</h1>
-                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.8</div>
+                <div style="font-size: 11px; color: #999999; margin-top: 4px; letter-spacing: 0.5px;">Desenvolvido por Nardoto · v4.8.9</div>
                 <div id="userName" style="font-size: 12px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;"></div>
             </div>
             <button id="logoutBtn" style="padding: 8px 20px; background: #000000; color: white; border: none; cursor: pointer; font-weight: 400; font-size: 14px;">
@@ -856,7 +856,14 @@
 
         // Mostrar hora da última atualização assim que a página carregar
         window.addEventListener('DOMContentLoaded', () => {
-            console.log('Script Generator v4.8.8');
+            console.log('Script Generator v4.8.9');
+
+            // Carregar histórico logo ao abrir o site
+            const historico = loadHistory();
+            if (historico.length > 0) {
+                console.log(`📚 ${historico.length} roteiro(s) encontrado(s) no histórico`);
+                renderHistory();
+            }
         });
 
         // Verificar autenticação
@@ -1171,6 +1178,52 @@
                     const { done, value } = await reader.read();
                     if (done) {
                         console.log('🏁 Stream terminado');
+
+                        // Processar chunks pendentes antes de terminar
+                        const chunksKeys = Object.keys(chunkBuffer);
+                        if (chunksKeys.length > 0) {
+                            console.log(`⚠️ Processando ${chunksKeys.length} chunks pendentes...`);
+                            chunksKeys.forEach(key => {
+                                const buffer = chunkBuffer[key];
+                                console.log(`   📦 Chunk pendente: ${key} com ${buffer.chunks.length} partes`);
+
+                                // Juntar chunks existentes mesmo que não esteja completo
+                                const fullContent = buffer.chunks.filter(c => c !== undefined).join('');
+
+                                if (fullContent.length > 0) {
+                                    console.log(`   ✅ Reconstruindo ${fullContent.length} chars de ${key}`);
+
+                                    // Processar como mensagem mesmo sem ter todos os chunks
+                                    const fullData = {
+                                        ...buffer.metadata,
+                                        content: fullContent,
+                                        isChunk: false
+                                    };
+
+                                    // Determinar label baseado no step
+                                    let label = 'IA';
+                                    if (fullData.step === 'estrutura') label = '📋 Estrutura';
+                                    else if (fullData.step === 'hook') label = '🎣 Hook';
+                                    else if (fullData.step === 'conclusao') label = '🎬 Conclusão';
+                                    else if (fullData.step && fullData.step.startsWith('topico')) {
+                                        const topicoNum = fullData.step.match(/\d+/)?.[0];
+                                        if (topicoNum) {
+                                            label = `📖 Tópico ${topicoNum}`;
+                                            currentFiles[`topico${topicoNum}`] = fullContent;
+                                            currentDocs[`topico${topicoNum}`] = fullContent;
+                                        }
+                                    }
+
+                                    addMessage(label, fullContent, 'assistant', {
+                                        prompt: fullData.prompt,
+                                        charCount: fullData.charCount,
+                                        charCountNoSpaces: fullData.charCountNoSpaces,
+                                        wordCount: fullData.wordCount
+                                    });
+                                }
+                            });
+                        }
+
                         break;
                     }
 
